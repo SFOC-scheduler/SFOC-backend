@@ -35,19 +35,19 @@ jobs:
       with:
         arguments: build
 
-    - name: Inject environment variable
-      uses: appleboy/ssh-action@master
-      id: env
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ubuntu
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SSH_PORT }}
-        envs: GITHUB_SHA
-        script: |
-          touch .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+#    - name: Inject environment variable
+#      uses: appleboy/ssh-action@master
+#      id: env
+#      with:
+#        host: ${{ secrets.SSH_HOST }}
+#        username: ubuntu
+#        key: ${{ secrets.SSH_PRIVATE_KEY }}
+#        port: ${{ secrets.SSH_PORT }}
+#        envs: GITHUB_SHA
+#        script: |
+#          touch .env
+#          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+#          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
 
     - name: Docker build & push to docker repo
       run: |
