@@ -45,6 +45,7 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         envs: GITHUB_SHA
         script: |
+          rm -f .env
           touch .env
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
