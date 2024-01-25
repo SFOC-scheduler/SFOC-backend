@@ -39,10 +39,10 @@ jobs:
       uses: appleboy/ssh-action@master
       id: env
       with:
-        host: ${{ secrets.SSH_HOST }}
+        host: ${{ secrets.MAIN_SSH_HOST }}
         username: ubuntu
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SSH_PORT }}
+        key: ${{ secrets.MAIN_SSH_PRIVATE_KEY }}
+        port: ${{ secrets.MAIN_SSH_PORT }}
         envs: GITHUB_SHA
         script: |
           rm -f .env
@@ -52,21 +52,21 @@ jobs:
 
     - name: Docker build & push to docker repo
       run: |
-        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-        docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }} .
-        docker push ${{ secrets.DOCKER_REPO }}
+        docker login -u ${{ secrets.MAIN_DOCKER_USERNAME }} -p ${{ secrets.MAIN_DOCKER_PASSWORD }}
+        docker build -f Dockerfile -t ${{ secrets.MAIN_DOCKER_REPO }} .
+        docker push ${{ secrets.MAIN_DOCKER_REPO }}
 
     - name: Deploy
       uses: appleboy/ssh-action@master
       id: deploy
       with:
-        host: ${{ secrets.SSH_HOST }}
+        host: ${{ secrets.MAIN_SSH_HOST }}
         username: ubuntu
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SSH_PORT }}
+        key: ${{ secrets.MAIN_SSH_PRIVATE_KEY }}
+        port: ${{ secrets.MAIN_SSH_PORT }}
         envs: GITHUB_SHA
         script: |
           sudo docker rm -f $(docker ps -qa)
-          sudo docker pull ${{ secrets.DOCKER_REPO }}
+          sudo docker pull ${{ secrets.MAIN_DOCKER_REPO }}
           docker compose up -d
           docker image prune -f
