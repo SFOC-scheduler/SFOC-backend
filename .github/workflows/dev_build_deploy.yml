@@ -9,9 +9,9 @@ name: CI/CD
 
 on:
   push:
-    branches: [ "feat" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "feat" ]
+    branches: [ "dev" ]
   workflow_dispatch:
 
 permissions:
@@ -39,10 +39,10 @@ jobs:
       uses: appleboy/ssh-action@master
       id: env
       with:
-        host: ${{ secrets.FEAT_SSH_HOST }}
+        host: ${{ secrets.DEV_SSH_HOST }}
         username: ubuntu
-        key: ${{ secrets.FEAT_SSH_PRIVATE_KEY }}
-        port: ${{ secrets.FEAT_SSH_PORT }}
+        key: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
+        port: ${{ secrets.DEV_SSH_PORT }}
         envs: GITHUB_SHA
         script: |
           rm -f .env
@@ -52,21 +52,21 @@ jobs:
 
     - name: Docker build & push to docker repo
       run: |
-        docker login -u ${{ secrets.FEAT_DOCKER_USERNAME }} -p ${{ secrets.FEAT_DOCKER_PASSWORD }}
-        docker build -f Dockerfile -t ${{ secrets.FEAT_DOCKER_REPO }} .
-        docker push ${{ secrets.FEAT_DOCKER_REPO }}
+        docker login -u ${{ secrets.DEV_DOCKER_USERNAME }} -p ${{ secrets.DEV_DOCKER_PASSWORD }}
+        docker build -f Dockerfile -t ${{ secrets.DEV_DOCKER_REPO }} .
+        docker push ${{ secrets.DEV_DOCKER_REPO }}
 
     - name: Deploy
       uses: appleboy/ssh-action@master
       id: deploy
       with:
-        host: ${{ secrets.FEAT_SSH_HOST }}
+        host: ${{ secrets.DEV_SSH_HOST }}
         username: ubuntu
-        key: ${{ secrets.FEAT_SSH_PRIVATE_KEY }}
-        port: ${{ secrets.FEAT_SSH_PORT }}
+        key: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
+        port: ${{ secrets.DEV_SSH_PORT }}
         envs: GITHUB_SHA
         script: |
           sudo docker rm -f $(docker ps -qa)
-          sudo docker pull ${{ secrets.FEAT_DOCKER_REPO }}
+          sudo docker pull ${{ secrets.DEV_DOCKER_REPO }}
           docker compose up -d
           docker image prune -f
