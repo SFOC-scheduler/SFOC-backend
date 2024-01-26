@@ -47,7 +47,8 @@ jobs:
         script: |
           rm -f .env
           touch .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_URL=${{ secrets.DEV_DB_URL }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
 
     - name: Docker build & push to docker repo
@@ -66,7 +67,7 @@ jobs:
         port: ${{ secrets.DEV_SSH_PORT }}
         envs: GITHUB_SHA
         script: |
-          sudo docker rm -f $(docker ps -qa)
           sudo docker pull ${{ secrets.DEV_DOCKER_REPO }}
+          sudo docker rm -f $(docker ps -qa)
           docker compose up -d
           docker image prune -f
