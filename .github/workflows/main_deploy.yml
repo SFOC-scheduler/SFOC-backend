@@ -5,12 +5,10 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
-name: MAIN_CI/CD
+name: Main CD
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
     branches: [ "main" ]
   workflow_dispatch:
 
@@ -18,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
 
@@ -41,11 +39,6 @@ jobs:
         docker login -u ${{ secrets.MAIN_DOCKER_USERNAME }} -p ${{ secrets.MAIN_DOCKER_PASSWORD }}
         docker build -f Dockerfile -t ${{ secrets.MAIN_DOCKER_REPO }} .
         docker push ${{ secrets.MAIN_DOCKER_REPO }}
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
 
     - name: Inject environment variable
       uses: appleboy/ssh-action@master
