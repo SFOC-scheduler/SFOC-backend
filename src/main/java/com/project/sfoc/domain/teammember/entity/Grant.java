@@ -1,4 +1,4 @@
-package com.project.sfoc.domain.member.entity;
+package com.project.sfoc.domain.teammember.entity;
 
 public enum Grant {
 

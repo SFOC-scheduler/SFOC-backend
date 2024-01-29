@@ -1,6 +1,6 @@
 package com.project.sfoc.domain.schedule.entity;
 
-import com.project.sfoc.domain.member.entity.Member;
+import com.project.sfoc.domain.teammember.entity.TeamMember;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -33,8 +33,8 @@ public class Schedule {
     private LocalDateTime endTime;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "team_member_id")
+    private TeamMember teamMember;
 
     @Column(name = "period_count")
     private Long periodCount;
