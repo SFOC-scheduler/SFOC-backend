@@ -1,4 +1,4 @@
-package com.project.sfoc.global.config;
+package com.project.sfoc.config;
 
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
