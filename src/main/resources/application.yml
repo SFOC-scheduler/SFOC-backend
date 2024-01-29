@@ -28,4 +28,3 @@ management:
     web:
       exposure:
         include: ["logfile"]
-
