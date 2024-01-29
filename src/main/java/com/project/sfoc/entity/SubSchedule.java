@@ -20,7 +20,7 @@ public class SubSchedule {
     @Column(name = "start_time")
     private LocalDateTime startTime;
 
-    @Column(name ="end_time")
+    @Column(name = "end_time")
     private LocalDateTime endTime;
 
     @ManyToOne

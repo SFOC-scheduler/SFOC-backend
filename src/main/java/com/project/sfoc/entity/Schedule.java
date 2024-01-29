@@ -21,6 +21,8 @@ public class Schedule {
     @Enumerated(EnumType.STRING)
     private PeriodType period_type;
     private String period;
+
+    @Column(name = "is_dday")
     private Boolean isDDay;
 
     @Column(name = "start_time")
@@ -30,8 +32,8 @@ public class Schedule {
     private LocalDateTime endTime;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @Column(name = "period_count")
     private Long periodCount;

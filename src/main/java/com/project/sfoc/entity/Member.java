@@ -13,11 +13,14 @@ public class Member {
     @Column(name = "member_id")
     private Long id;
 
-    private String team_nickname;
+    @Column(name = "team_nickname")
+    private String teamNickname;
 
-    private String user_nickname;
+    @Column(name = "user_nickname")
+    private String userNickname;
 
     @Enumerated(value = EnumType.STRING)
+    @Column(name = "grant_type")
     private Grant grant;
 
     @ManyToOne
