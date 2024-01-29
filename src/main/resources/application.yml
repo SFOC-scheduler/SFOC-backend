@@ -1,9 +1,11 @@
-debug: false
-
 logging:
-  level:
-    org.springframework.web.servlet: debug
-    org.hibernate.type.descriptor.sql: trace
+  file:
+    name: ./var/log/spring.log
+  logback:
+    rollingpolicy:
+      max-history: 0
+      file-name-pattern: "${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz"
+      max-file-size: 20KB
 
 spring:
   datasource:
@@ -12,21 +14,18 @@ spring:
     password: ${LOCAL_DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    defer-datasource-initialization: true
+    open-in-view: false
     hibernate:
       ddl-auto: create
-    open-in-view: false
-    show-sql: true
     properties:
       hibernate:
+        show_sql: true
         format_sql: true
-        default_batch_fetch_size: 100
-    database-platform: org.hibernate.dialect.MySQLDialect
-  sql:
-    init:
-      mode: always
+        highlight_sql: true
 
-  security:
-    user:
-      name: user
-      password: 1234
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ["logfile"]
+
