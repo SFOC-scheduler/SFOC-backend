@@ -6,6 +6,8 @@ logging:
       max-history: 0
       file-name-pattern: "${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz"
       max-file-size: 20KB
+  level:
+    org.hibernate.type.descriptor.sql: trace
 
 spring:
   datasource:
@@ -22,6 +24,16 @@ spring:
         show_sql: true
         format_sql: true
         highlight_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+            client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
 
 management:
   endpoints:
