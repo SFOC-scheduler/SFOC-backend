@@ -1,7 +1,6 @@
 package com.project.sfoc.entity;
 
 import com.project.sfoc.entity.user.User;
-import com.project.sfoc.team.Disclosure;
 import com.project.sfoc.team.Team;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -34,17 +33,17 @@ public class TeamMember {
     @JoinColumn(name = "team_id")
     private Team team;
 
-    public TeamMember(String teamNickname, String userNickname, Grant grant, User user, Team team) {
+    public TeamMember(String teamNickname, String userNickname, TeamGrant teamGrant, User user, Team team) {
         this.teamNickname = teamNickname;
         this.userNickname = userNickname;
-        this.grant = grant;
+        this.teamGrant = teamGrant;
         this.user = user;
         this.team = team;
     }
 
     public static TeamMember of(String teamNickname, String userNickname,
-                                Grant grant, User user, Team team){
-        return new TeamMember(teamNickname, userNickname, grant, user, team);
+                                TeamGrant teamGrant, User user, Team team){
+        return new TeamMember(teamNickname, userNickname, teamGrant, user, team);
     }
 
 }

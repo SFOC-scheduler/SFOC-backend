@@ -24,6 +24,7 @@ public class User {
     private String sub;
 
     @Column(name = "user_grant")
+    @Enumerated(value = EnumType.STRING)
     private Grant grant;
 
     private User(Provider provider, String email, String sub, Grant grant) {

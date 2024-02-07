@@ -6,7 +6,5 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum Grant {
-    ADMIN("ROLE_ADMIN"), USER("ROLE_USER");
-
-    private final String role;
+    ADMIN, USER
 }
