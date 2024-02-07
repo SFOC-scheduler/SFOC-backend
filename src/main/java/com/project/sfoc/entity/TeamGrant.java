@@ -1,6 +1,6 @@
 package com.project.sfoc.entity;
 
-public enum Grant {
+public enum TeamGrant {
 
     HIGHEST_ADMIN, MIDDLE_ADMIN, NORMAL
 }
