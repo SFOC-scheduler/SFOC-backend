@@ -23,18 +23,22 @@ public class User {
 
     private String sub;
 
-    private User(Provider provider, String email, String sub) {
+    private Grant grant;
+
+    private User(Provider provider, String email, String sub, Grant grant) {
         this.provider = provider;
         this.email = email;
         this.sub = sub;
+        this.grant = grant;
     }
 
     public static User of(Provider provider, String email, String sub) {
-        return new User(provider, email, sub);
+        return new User(provider, email, sub, Grant.USER);
     }
 
     public User update(String email) {
-        return User.of(this.provider, email, this.sub);
+        this.email = email;
+        return this;
     }
 
 }
