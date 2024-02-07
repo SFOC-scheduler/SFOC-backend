@@ -21,8 +21,8 @@ public class Member {
     private String userNickname;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "grant_type")
-    private Grant grant;
+    @Column(name = "team_grant_type")
+    private TeamGrant teamGrant;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
