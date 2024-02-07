@@ -21,10 +21,19 @@ public class TeamService {
     }
 
 
-    private String createInvitationCode() {
-        String randomUUID = UUID.randomUUID().toString();
-        String[] split = randomUUID.split("-");
-        return split[0];
+    public String createInvitationCode() {
+        String code = null;
+        while(code == null || isDuplicateUuidCode(code)) {
+            String randomUUID = UUID.randomUUID().toString();
+            String[] split = randomUUID.split("-");
+            code = split[0];
+        }
+
+        return code;
+    }
+
+    private boolean isDuplicateUuidCode(String code) {
+        return teamRepository.existsByInvitationCode(code);
     }
 
 }

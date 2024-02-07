@@ -17,7 +17,7 @@ public class Team {
 
     private String name;
 
-    @Column(name = "invitation_code")
+    @Column(name = "invitation_code", unique = true)
     private String invitationCode;
 
     private String description;
