@@ -1,5 +1,6 @@
 package com.project.sfoc.entity;
 
+import com.project.sfoc.team.Team;
 import com.project.sfoc.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -7,10 +8,10 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AdmissionRequest {
+public class EntryRequest {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "addmission_request_id")
+    @Column(name = "entry_request_id")
     private Long id;
 
     @ManyToOne
