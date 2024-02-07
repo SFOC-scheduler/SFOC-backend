@@ -23,6 +23,7 @@ public class User {
 
     private String sub;
 
+    @Column(name = "user_grant")
     private Grant grant;
 
     private User(Provider provider, String email, String sub, Grant grant) {
