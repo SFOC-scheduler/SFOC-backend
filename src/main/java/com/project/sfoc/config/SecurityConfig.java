@@ -41,7 +41,7 @@ public class SecurityConfig {
                 )
 //                .sessionManagement(session -> session
 //                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .logout(logout -> logout.logoutSuccessUrl("/"))
+                .logout(logout -> logout.logoutSuccessUrl("/login"))
                 .build();
     }
 
