@@ -1,6 +1,7 @@
-package com.project.sfoc.entity.user;
+package com.project.sfoc.security;
 
 import com.project.sfoc.entity.Provider;
+import com.project.sfoc.entity.user.UserDto;
 
 import java.util.Arrays;
 import java.util.Map;
