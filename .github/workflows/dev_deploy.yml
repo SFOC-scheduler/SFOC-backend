@@ -59,6 +59,7 @@ jobs:
           echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> .env
           echo "KAKAO_OAUTH_CLIENT_ID=${{ secrets.KAKAO_OAUTH_CLIENT_ID }}" >> .env
           echo "KAKAO_OAUTH_CLIENT_SECRET=${{ secrets.KAKAO_OAUTH_CLIENT_SECRET }}" >> .env
+          echo "KEY_STORE_PASSWORD=${{ secrets.KEY_STORE_PASSWORD }}" >> .env
 
     - name: Deploy
       uses: appleboy/ssh-action@master
