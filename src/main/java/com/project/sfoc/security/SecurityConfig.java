@@ -1,6 +1,5 @@
 package com.project.sfoc.security;
 
-import com.project.sfoc.security.CustomAuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
