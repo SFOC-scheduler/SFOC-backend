@@ -1,5 +1,7 @@
 package com.project.sfoc.config;
 
+import com.project.sfoc.security.CustomAuthenticationSuccessHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,13 +22,14 @@ import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
+//    private final CustomAuthenticationSuccessHandler authenticationSuccessHandler;
+
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService
-    ) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource()))
@@ -37,6 +40,7 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .defaultSuccessUrl("/oauth/loginInfo", true)
+//                        .successHandler(authenticationSuccessHandler)
                         .userInfoEndpoint(user -> user.userService(oAuth2UserService))
                 )
 //                .sessionManagement(session -> session
