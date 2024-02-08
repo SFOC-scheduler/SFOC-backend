@@ -1,4 +1,4 @@
-package com.project.sfoc.config;
+package com.project.sfoc.security;
 
 import com.project.sfoc.security.CustomAuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
