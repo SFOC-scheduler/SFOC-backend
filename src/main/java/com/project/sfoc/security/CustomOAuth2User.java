@@ -18,9 +18,7 @@ public class CustomOAuth2User implements OAuth2User {
     @Override
     public Map<String, Object> getAttributes() {
         Map<String, Object> attributes = new LinkedHashMap<>();
-        attributes.put("sub", user.getSub());
-        attributes.put("provider", user.getProvider().name());
-        attributes.put("email", user.getEmail());
+        attributes.put("id", user.getId());
         return attributes;
     }
 
@@ -40,4 +38,7 @@ public class CustomOAuth2User implements OAuth2User {
     public String getName() {
         return user.getProvider().name() + user.getSub();
     }
+
+    public Long getId() { return user.getId(); }
+
 }
