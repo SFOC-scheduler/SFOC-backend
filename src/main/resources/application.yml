@@ -43,6 +43,9 @@ spring:
               - email
               - profile
 
+jwt:
+  secret: ${JWT_SECRET}
+
 management:
   endpoints:
     web:
