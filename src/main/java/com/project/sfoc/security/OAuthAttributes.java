@@ -9,10 +9,18 @@ import java.util.function.Function;
 
 @RequiredArgsConstructor
 public enum OAuthAttributes {
+
     GOOGLE("google", (attributes) -> {
-        String email = (String) attributes.get("email");
-        String sub = (String) attributes.get("sub");
+        String email = String.valueOf( attributes.get("email"));
+        String sub = String.valueOf(attributes.get("sub"));
         return OAuth2UserInfo.of(Provider.GOOGLE, email, sub);
+    }),
+
+    KAKAO("kakao", (attributes) -> {
+//        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+//        String email = String.valueOf(kakaoAccount.get("email"));
+        String id = String.valueOf(attributes.get("id"));
+        return OAuth2UserInfo.of(Provider.KAKAO, null, id);  //TODO - 이메일 정보 권한 받아오기
     });
 
     private final String registrationId;
@@ -25,4 +33,5 @@ public enum OAuthAttributes {
                 .orElseThrow(IllegalArgumentException::new)
                 .of.apply(attributes);
     }
+
 }
