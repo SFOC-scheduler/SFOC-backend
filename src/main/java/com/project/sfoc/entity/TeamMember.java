@@ -33,7 +33,7 @@ public class TeamMember {
     @JoinColumn(name = "team_id")
     private Team team;
 
-    public TeamMember(String teamNickname, String userNickname, TeamGrant teamGrant, User user, Team team) {
+    private TeamMember(String teamNickname, String userNickname, TeamGrant teamGrant, User user, Team team) {
         this.teamNickname = teamNickname;
         this.userNickname = userNickname;
         this.teamGrant = teamGrant;
