@@ -17,13 +17,13 @@ public class OAuthController {
 
     @GetMapping("/loginInfo")
     public ResponseEntity<Map<String, Object>> oauthLoginInfo(Authentication authentication){
-        Long id = (Long) authentication.getPrincipal();
+        UserClaims userClaims = (UserClaims) authentication.getPrincipal();
         String role = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
         Map<String, Object> map = new HashMap<>();
-        map.put("id", id);
+        map.put("id", userClaims.id());
         map.put("role", role);
 
         return ResponseEntity.ok(map);

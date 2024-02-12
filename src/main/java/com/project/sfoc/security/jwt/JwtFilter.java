@@ -33,10 +33,12 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        Long id = jwtUtil.getId(token);
-        String role = jwtUtil.getRole(token);
+        UserClaims userClaims = jwtUtil.getUserClaims(token);
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(id, null, List.of(new SimpleGrantedAuthority(role)));
+                new UsernamePasswordAuthenticationToken(
+                        userClaims,
+                        null,
+                        List.of(new SimpleGrantedAuthority(userClaims.role())));
 
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
