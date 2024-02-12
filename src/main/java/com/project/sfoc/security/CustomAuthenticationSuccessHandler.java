@@ -39,7 +39,7 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
-        return jwtUtil.createJwt(id, role);
+        return jwtUtil.createAccessToken(id, role);
     }
 
     private String getRedirectUrl(String token) {
