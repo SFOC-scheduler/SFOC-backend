@@ -26,6 +26,8 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        System.out.println(request.getRemoteAddr());
+
         String token = resolveToken(request);
 
         if (token == null || jwtUtil.isExpired(token)) {

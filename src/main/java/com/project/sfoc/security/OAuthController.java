@@ -1,5 +1,6 @@
 package com.project.sfoc.security;
 
+import com.project.sfoc.security.jwt.UserClaims;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/oauth")
@@ -19,8 +19,9 @@ public class OAuthController {
     public ResponseEntity<Map<String, Object>> oauthLoginInfo(Authentication authentication){
         UserClaims userClaims = (UserClaims) authentication.getPrincipal();
         String role = authentication.getAuthorities().stream()
+                .findFirst()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
+                .orElse("Anonymous");
 
         Map<String, Object> map = new HashMap<>();
         map.put("id", userClaims.id());
