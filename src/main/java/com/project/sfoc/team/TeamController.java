@@ -19,27 +19,22 @@ public class TeamController {
     private final TeamService teamService;
 
     @PostMapping
-    public ResponseEntity<?> createTeam(@RequestBody TeamRequestDto teamRequestDto) {
-        teamService.createTeam(teamRequestDto);
+    public ResponseEntity<?> createTeam(@RequestBody TeamRequestDto teamRequestDto, Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        teamService.createTeam(teamRequestDto, userId);
         log.info("팀 생성");
-
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{teamId}/entry")
-    public ResponseEntity<Map<String, Object>> setUserNickname(@RequestBody String userNickname,
+    public ResponseEntity<TeamMemberDto> setUserNickname(@RequestBody Map<String, String> userNickname,
                                                                @PathVariable Long teamId, Authentication authentication) {
 
         Long userId = (Long) authentication.getPrincipal();
-        TeamGrant teamGrant = teamService.entryTeam(TeamMemberDto.of(userNickname, userId, teamId));
+        TeamMemberDto teamMemberDto = teamService.entryTeam(TeamMemberDto.of(userId, teamId, userNickname.get("userNickname"), TeamGrant.NORMAL));
 
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("userId", userId);
-        map.put("teamId", teamId);
-        map.put("userNickname", userNickname);
-        map.put("grant", teamGrant);
 
-        return ResponseEntity.ok(map);
+        return ResponseEntity.ok(teamMemberDto);
     }
 
 }
