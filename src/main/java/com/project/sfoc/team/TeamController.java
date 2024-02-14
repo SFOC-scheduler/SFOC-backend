@@ -1,6 +1,8 @@
 package com.project.sfoc.team;
 
 import com.project.sfoc.entity.TeamGrant;
+import com.project.sfoc.security.CustomOAuth2User;
+import com.project.sfoc.security.jwt.UserClaims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -20,18 +22,23 @@ public class TeamController {
 
     @PostMapping
     public ResponseEntity<?> createTeam(@RequestBody TeamRequestDto teamRequestDto, Authentication authentication) {
-        Long userId = (Long) authentication.getPrincipal();
+
+        UserClaims userClaims = (UserClaims) authentication.getPrincipal();
+        Long userId = userClaims.id();
+
         teamService.createTeam(teamRequestDto, userId);
         log.info("팀 생성");
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{teamId}/entry")
-    public ResponseEntity<TeamMemberDto> setUserNickname(@RequestBody Map<String, String> userNickname,
+    public ResponseEntity<TeamMemberDto> setUserNickname(@RequestBody UserNicknameDto userNicknameDto,
                                                                @PathVariable Long teamId, Authentication authentication) {
 
-        Long userId = (Long) authentication.getPrincipal();
-        TeamMemberDto teamMemberDto = teamService.entryTeam(TeamMemberDto.of(userId, teamId, userNickname.get("userNickname"), TeamGrant.NORMAL));
+        UserClaims userClaims = (UserClaims) authentication.getPrincipal();
+        Long userId = userClaims.id();
+
+        TeamMemberDto teamMemberDto = teamService.entryTeam(TeamMemberDto.of(userId, teamId, userNicknameDto.userNickname(), TeamGrant.NORMAL));
 
 
         return ResponseEntity.ok(teamMemberDto);
