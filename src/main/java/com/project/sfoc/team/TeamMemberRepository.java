@@ -9,5 +9,5 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
 
     boolean existsByTeam(Team team);
 
-    boolean existsByUserNickname(String userNickname);
+    boolean existsByUserNicknameAndTeam(String userNickname, Team team);
 }
