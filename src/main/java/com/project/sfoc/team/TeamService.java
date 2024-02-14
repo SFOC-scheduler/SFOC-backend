@@ -26,32 +26,29 @@ public class TeamService {
     private final TeamMemberRepository teamMemberRepository;
 
 
-    public void defaultCreateTeam(TeamRequestDto teamRequestDto) {
-        final Team team = teamRequestDto.toEntity(null);
-        teamRepository.save(team);
-    }
-
-
-    public void createTeam(TeamRequestDto teamRequestDto) {
+    public void createTeam(TeamRequestDto teamRequestDto, Long userId) {
         final Team team = teamRequestDto.toEntity(createInvitationCode());
         teamRepository.save(team);
+
+        entryTeam(TeamMemberDto.of(userId, team.getId(), teamRequestDto.userNickname(), HIGHEST_ADMIN));
+
     }
 
-    public TeamGrant entryTeam(TeamMemberDto teamMemberDto) {
-
-        if (isDuplicateTeamUserNickname(teamMemberDto.userNickname())) {
-            log.info("닉네임 중복 오류");
-            throw new IllegalArgumentException();
-        }
+    public TeamMemberDto entryTeam(TeamMemberDto teamMemberDto) {
 
         User user = findUserByUserId(teamMemberDto.userId());
         Team team = findTeamByTeamId(teamMemberDto.teamId());
 
-        TeamGrant teamGrant = setAuthority(team);
+        if (isDuplicateTeamUserNickname(teamMemberDto.userNickname(), team)) {
+            log.info("닉네임 중복 오류");
+            throw new IllegalArgumentException();
+        }
 
-        TeamMember teamMember = teamMemberDto.toEntity(team.getName(), teamGrant, user, team);
+
+        TeamMember teamMember = teamMemberDto.toEntity(team.getName(), user, team);
         teamMemberRepository.save(teamMember);
-        return teamGrant;
+
+        return TeamMemberDto.from(teamMember);
     }
 
     public String createInvitationCode() {
@@ -65,21 +62,12 @@ public class TeamService {
         return code;
     }
 
-    private TeamGrant setAuthority(Team team) {
-        if (teamMemberRepository.existsByTeam(team)) {
-            return NORMAL;
-        }
-        else {
-            return HIGHEST_ADMIN;
-        }
-    }
-
     private boolean isDuplicateUuidCode(String code) {
         return teamRepository.existsByInvitationCode(code);
     }
 
-    private boolean isDuplicateTeamUserNickname(String userNickname) {
-        return teamMemberRepository.existsByUserNickname(userNickname);
+    private boolean isDuplicateTeamUserNickname(String userNickname, Team team) {
+        return teamMemberRepository.existsByUserNicknameAndTeam(userNickname, team);
     }
 
     private Team findTeamByTeamId(Long teamId) {
