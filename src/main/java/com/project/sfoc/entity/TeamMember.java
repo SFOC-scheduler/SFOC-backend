@@ -4,9 +4,11 @@ import com.project.sfoc.entity.user.User;
 import com.project.sfoc.team.Team;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TeamMember {
 

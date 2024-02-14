@@ -6,16 +6,27 @@ import com.project.sfoc.entity.user.User;
 
 public record TeamMemberDto(
 
-        String userNickname,
         Long userId,
-        Long teamId
+        Long teamId,
+        String userNickname,
+        TeamGrant teamGrant
 ) {
-    public TeamMember toEntity(String teamNickname, TeamGrant teamGrant, User user, Team team) {
-        return TeamMember.of(teamNickname, userNickname, teamGrant, user, team);
+    public TeamMember toEntity(String teamNickname, User user, Team team) {
+        return TeamMember.of(team.getName(), userNickname, teamGrant, user, team);
     }
 
-    public static TeamMemberDto of(String userNickname, Long userId, Long teamId) {
-        return new TeamMemberDto(userNickname, userId, teamId);
+    public static TeamMemberDto of(Long userId, Long teamId, String userNickname, TeamGrant teamGrant) {
+        return new TeamMemberDto(userId, teamId, userNickname, teamGrant);
+    }
+
+
+    public static TeamMemberDto from(TeamMember teamMember) {
+        return TeamMemberDto.of(
+            teamMember.getUser().getId(),
+            teamMember.getTeam().getId(),
+            teamMember.getUserNickname(),
+            teamMember.getTeamGrant()
+        );
     }
 
 }
