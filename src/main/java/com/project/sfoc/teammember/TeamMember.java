@@ -1,4 +1,4 @@
-package com.project.sfoc.entity;
+package com.project.sfoc.teammember;
 
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.team.Team;
@@ -46,6 +46,15 @@ public class TeamMember {
     public static TeamMember of(String teamNickname, String userNickname,
                                 TeamGrant teamGrant, User user, Team team){
         return new TeamMember(teamNickname, userNickname, teamGrant, user, team);
+    }
+
+    public void update(String teamNickname, String userNickname) {
+            this.teamNickname = teamNickname;
+            this.userNickname = userNickname;
+    }
+
+    public void updateTeamGrant(TeamGrant teamGrant) {
+            this.teamGrant = teamGrant;
     }
 
 }
