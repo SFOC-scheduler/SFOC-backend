@@ -1,4 +1,7 @@
-package com.project.sfoc.team;
+package com.project.sfoc.team.dto;
+
+import com.project.sfoc.team.Disclosure;
+import com.project.sfoc.team.Team;
 
 public record TeamRequestDto(
 

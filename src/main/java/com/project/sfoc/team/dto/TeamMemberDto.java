@@ -1,8 +1,9 @@
-package com.project.sfoc.team;
+package com.project.sfoc.team.dto;
 
-import com.project.sfoc.entity.TeamGrant;
-import com.project.sfoc.entity.TeamMember;
+import com.project.sfoc.teammember.TeamGrant;
+import com.project.sfoc.team.Team;
 import com.project.sfoc.entity.user.User;
+import com.project.sfoc.teammember.TeamMember;
 
 public record TeamMemberDto(
 
