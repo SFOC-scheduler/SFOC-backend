@@ -1,9 +1,13 @@
 package com.project.sfoc.team;
 
-import com.project.sfoc.entity.TeamGrant;
-import com.project.sfoc.entity.TeamMember;
+import com.project.sfoc.teammember.TeamGrant;
+import com.project.sfoc.team.dto.TeamRequestDto;
+import com.project.sfoc.team.dto.TeamInfoDto;
+import com.project.sfoc.teammember.TeamMember;
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.entity.user.UserRepository;
+import com.project.sfoc.team.dto.TeamMemberDto;
+import com.project.sfoc.teammember.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,8 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static com.project.sfoc.entity.TeamGrant.HIGHEST_ADMIN;
-import static com.project.sfoc.entity.TeamGrant.NORMAL;
+import static com.project.sfoc.teammember.TeamGrant.*;
 
 
 @Service
@@ -51,7 +54,27 @@ public class TeamService {
         return TeamMemberDto.from(teamMember);
     }
 
-    public String createInvitationCode() {
+    public TeamInfoDto getTeamInfo(Long teamId, Long userId) {
+        Team team = findTeamByTeamId(teamId);
+        TeamMember teamMember = findTeamMemberByTeamAndUser(teamId, userId);
+
+        return TeamInfoDto.from(teamMember, team);
+    }
+
+    public void updateTeamInfo(TeamInfoDto teamInfoDto, Long teamId, Long userId) {
+        TeamMember teamMember = findTeamMemberByTeamAndUser(teamId, userId);
+
+        TeamGrant teamGrant = teamMember.getTeamGrant();
+        if (teamGrant == HIGHEST_ADMIN || teamGrant == MIDDLE_ADMIN) {
+            Team team = findTeamByTeamId(teamId);
+            team.update(teamInfoDto.teamName(), teamInfoDto.description(), teamInfoDto.disclosure());
+        }
+
+        teamMember.update(teamInfoDto.teamNickname(), teamInfoDto.userNickname());
+
+    }
+
+    private String createInvitationCode() {
         String code = null;
         while(code == null || isDuplicateUuidCode(code)) {
             String randomUUID = UUID.randomUUID().toString();
@@ -77,4 +100,10 @@ public class TeamService {
     private User findUserByUserId(Long userId) {
         return userRepository.findById(userId).orElseThrow(IllegalArgumentException::new);
     }
+
+    private TeamMember findTeamMemberByTeamAndUser(Long teamId, Long userId) {
+        return teamMemberRepository.findByTeam_IdAndUser_Id(teamId, userId).orElseThrow(IllegalArgumentException::new);
+    }
+
+
 }
