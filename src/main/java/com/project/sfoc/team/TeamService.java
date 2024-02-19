@@ -81,7 +81,7 @@ public class TeamService {
             teamMember.update(teamInfoDto.teamNickname(), teamInfoDto.userNickname());
 
         } else {
-            teamMember.update(teamInfoDto.getTeamNickname(), teamInfoDto.getUserNickname());
+            teamMember.update(teamInfoDto.teamNickname(), teamInfoDto.userNickname());
         }
 
     }
