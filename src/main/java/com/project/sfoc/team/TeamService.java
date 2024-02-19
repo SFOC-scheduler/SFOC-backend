@@ -1,12 +1,10 @@
 package com.project.sfoc.team;
 
+import com.project.sfoc.team.dto.*;
 import com.project.sfoc.teammember.TeamGrant;
-import com.project.sfoc.team.dto.TeamRequestDto;
-import com.project.sfoc.team.dto.TeamInfoDto;
 import com.project.sfoc.teammember.TeamMember;
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.entity.user.UserRepository;
-import com.project.sfoc.team.dto.TeamMemberDto;
 import com.project.sfoc.teammember.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +35,8 @@ public class TeamService {
 
     }
 
+    //TODO: 같은 user 중복 방지
+
     public TeamMemberDto entryTeam(TeamMemberDto teamMemberDto) {
 
         User user = findUserByUserId(teamMemberDto.userId());
@@ -54,23 +54,35 @@ public class TeamService {
         return TeamMemberDto.from(teamMember);
     }
 
-    public TeamInfoDto getTeamInfo(Long teamId, Long userId) {
+
+    // 팀 설정을 위한 팀 정보 조회
+    public AbstractTeamInfoDto getTeamInfo(Long teamId, Long userId) {
         Team team = findTeamByTeamId(teamId);
         TeamMember teamMember = findTeamMemberByTeamAndUser(teamId, userId);
+        TeamGrant teamGrant = teamMember.getTeamGrant();
+        if(teamGrant == NORMAL) {
+            return AbstractTeamInfoDto.from(teamMember);
 
-        return TeamInfoDto.from(teamMember, team);
+        } else {
+            return AbstractTeamInfoDto.from(team, teamMember);
+        }
+
     }
 
-    public void updateTeamInfo(TeamInfoDto teamInfoDto, Long teamId, Long userId) {
+    public void updateTeamInfo(UpdateTeamInfo teamInfoDto, Long teamId, Long userId) {
         TeamMember teamMember = findTeamMemberByTeamAndUser(teamId, userId);
 
         TeamGrant teamGrant = teamMember.getTeamGrant();
+
         if (teamGrant == HIGHEST_ADMIN || teamGrant == MIDDLE_ADMIN) {
+
             Team team = findTeamByTeamId(teamId);
             team.update(teamInfoDto.teamName(), teamInfoDto.description(), teamInfoDto.disclosure());
-        }
+            teamMember.update(teamInfoDto.teamNickname(), teamInfoDto.userNickname());
 
-        teamMember.update(teamInfoDto.teamNickname(), teamInfoDto.userNickname());
+        } else {
+            teamMember.update(teamInfoDto.getTeamNickname(), teamInfoDto.getUserNickname());
+        }
 
     }
 

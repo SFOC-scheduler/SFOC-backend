@@ -1,11 +1,8 @@
 package com.project.sfoc.team;
 
+import com.project.sfoc.team.dto.*;
 import com.project.sfoc.teammember.TeamGrant;
 import com.project.sfoc.security.jwt.UserClaims;
-import com.project.sfoc.team.dto.TeamRequestDto;
-import com.project.sfoc.team.dto.TeamInfoDto;
-import com.project.sfoc.team.dto.UserNicknameDto;
-import com.project.sfoc.team.dto.TeamMemberDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -44,19 +41,19 @@ public class TeamController {
         return ResponseEntity.ok(teamMemberDto);
     }
 
-    @GetMapping("{teamId}")
-    public ResponseEntity<TeamInfoDto> getTeamInfo(@PathVariable Long teamId, Authentication authentication) {
+    @GetMapping("/{teamId}")
+    public ResponseEntity<AbstractTeamInfoDto> getTeamInfo(@PathVariable Long teamId, Authentication authentication) {
 
         UserClaims userClaim = (UserClaims) authentication.getPrincipal();
         Long userId = userClaim.id();
 
-        TeamInfoDto teamInfo = teamService.getTeamInfo(teamId, userId);
+        AbstractTeamInfoDto teamInfo = teamService.getTeamInfo(teamId, userId);
 
         return ResponseEntity.ok(teamInfo);
     }
 
-    @PatchMapping("{teamId}")
-    public ResponseEntity<TeamInfoDto> setTeam(@RequestBody TeamInfoDto teamInfoDto,
+    @PatchMapping("/{teamId}")
+    public ResponseEntity<UpdateTeamInfo> setTeam(@RequestBody UpdateTeamInfo teamInfoDto,
                                      @PathVariable Long teamId, Authentication authentication) {
 
         UserClaims userClaim = (UserClaims) authentication.getPrincipal();
