@@ -102,19 +102,18 @@ public class JwtUtil {
                 .toString();
     }
 
-    public String resolveAccessToken(HttpServletRequest request) {
+    public Optional<String> resolveAccessToken(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(ACCESS_HEADER))
                 .filter(authorization -> authorization.startsWith("Bearer "))
-                .map(authorization -> authorization.split(" ")[1])
-                .orElse(null);
+                .map(authorization -> authorization.split(" ")[1]);
     }
 
-    public String resolveRefreshToken(HttpServletRequest request) {
-        return Arrays.stream(request.getCookies())
-                .filter(cookie -> cookie.getName().equals(REFRESH_TYPE))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElse(null);
+    public Optional<String> resolveRefreshToken(HttpServletRequest request) {
+        return Optional.ofNullable(request.getCookies())
+                .flatMap(cookies -> Arrays.stream(cookies)
+                        .filter(cookie -> cookie.getName().equals(REFRESH_TYPE))
+                        .findFirst()
+                        .map(Cookie::getValue));
     }
 
     public String getRedirectUrl(String accessToken) {

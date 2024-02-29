@@ -32,7 +32,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         log.info("접속자 ip={}", request.getRemoteAddr());
 
-        String accessToken = jwtUtil.resolveAccessToken(request);
+        String accessToken = jwtUtil.resolveAccessToken(request).orElse(null);
         log.info("accessToken={}", accessToken);
 
         if (accessToken == null) {
@@ -54,10 +54,10 @@ public class JwtFilter extends OncePerRequestFilter {
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         } catch (Exception e1) {
-            String refreshToken = jwtUtil.resolveRefreshToken(request);
+            String refreshToken = jwtUtil.resolveRefreshToken(request).orElse(null);
             log.info("refreshToken={}", refreshToken);
 
-            if (refreshTokenService.isValid(refreshToken)) {
+            if (refreshToken != null && refreshTokenService.isValid(refreshToken)) {
                 try {
                     UserClaims userClaims = jwtUtil.getUserClaims(refreshToken);
                     TokenDto tokenDto = jwtUtil.createTokens(userClaims.id(), userClaims.role());
