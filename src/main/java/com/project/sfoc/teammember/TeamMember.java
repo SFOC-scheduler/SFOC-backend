@@ -1,12 +1,14 @@
-package com.project.sfoc.entity;
+package com.project.sfoc.teammember;
 
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.team.Team;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TeamMember {
 
@@ -33,7 +35,7 @@ public class TeamMember {
     @JoinColumn(name = "team_id")
     private Team team;
 
-    public TeamMember(String teamNickname, String userNickname, TeamGrant teamGrant, User user, Team team) {
+    private TeamMember(String teamNickname, String userNickname, TeamGrant teamGrant, User user, Team team) {
         this.teamNickname = teamNickname;
         this.userNickname = userNickname;
         this.teamGrant = teamGrant;
@@ -44,6 +46,15 @@ public class TeamMember {
     public static TeamMember of(String teamNickname, String userNickname,
                                 TeamGrant teamGrant, User user, Team team){
         return new TeamMember(teamNickname, userNickname, teamGrant, user, team);
+    }
+
+    public void update(String teamNickname, String userNickname) {
+            this.teamNickname = teamNickname;
+            this.userNickname = userNickname;
+    }
+
+    public void updateTeamGrant(TeamGrant teamGrant) {
+            this.teamGrant = teamGrant;
     }
 
 }

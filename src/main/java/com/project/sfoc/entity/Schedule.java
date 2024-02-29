@@ -1,5 +1,6 @@
 package com.project.sfoc.entity;
 
+import com.project.sfoc.teammember.TeamMember;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
