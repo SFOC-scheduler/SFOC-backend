@@ -35,4 +35,10 @@ public class Team {
     public static Team of(String name, String invitationCode, String description, Disclosure disclosure){
         return new Team(name, invitationCode, description, disclosure);
     }
+
+    public void update(String name, String description ,Disclosure disclosure) {
+            this.name = name;
+            this.description = description;
+            this.disclosure = disclosure;
+    }
 }
