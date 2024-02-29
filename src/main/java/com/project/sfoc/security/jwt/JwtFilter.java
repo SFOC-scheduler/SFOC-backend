@@ -1,5 +1,6 @@
 package com.project.sfoc.security.jwt;
 
+import com.project.sfoc.security.jwt.redis.RefreshTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,43 +24,54 @@ import java.util.List;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        log.info(request.getRemoteAddr());
+        log.info("접속자 ip={}", request.getRemoteAddr());
 
-        String token = resolveToken(request);
+        String accessToken = jwtUtil.resolveAccessToken(request).orElse(null);
+        log.info("accessToken={}", accessToken);
 
-        if (token == null || jwtUtil.isExpired(token)) {
+        if (accessToken == null) {
+            log.info("인증 실패");
             filterChain.doFilter(request, response);
             return;
         }
 
-        UserClaims userClaims = jwtUtil.getUserClaims(token);
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(
-                        userClaims,
-                        null,
-                        List.of(new SimpleGrantedAuthority(userClaims.role())));
+        try {
+            UserClaims userClaims = jwtUtil.getUserClaims(accessToken);
+            log.info("인증 완료");
 
-        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(
+                            userClaims,
+                            null,
+                            List.of(new SimpleGrantedAuthority(userClaims.role())));
 
-        filterChain.doFilter(request, response);
-    }
+            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        } catch (Exception e1) {
+            String refreshToken = jwtUtil.resolveRefreshToken(request).orElse(null);
+            log.info("refreshToken={}", refreshToken);
 
-    private String resolveToken(HttpServletRequest request) {
-        final String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+            if (refreshToken != null && refreshTokenService.isValid(refreshToken)) {
+                try {
+                    UserClaims userClaims = jwtUtil.getUserClaims(refreshToken);
+                    TokenDto tokenDto = jwtUtil.createTokens(userClaims.id(), userClaims.role());
+                    log.info("access token 재발급");
 
-        logger.info("authorization = " + authorization);
-
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            return null;
+                    response.setHeader(HttpHeaders.SET_COOKIE, jwtUtil.createCookie(JwtUtil.REFRESH_TYPE, tokenDto.refreshToken()));
+                    response.sendRedirect(jwtUtil.getRedirectUrl(tokenDto.accessToken()));
+                } catch (Exception e2) {
+                    log.info("유효하지 않은 refresh token");
+                }
+            }
+        } finally {
+            filterChain.doFilter(request, response);
         }
-
-        return authorization.split(" ")[1];
     }
 
 }
