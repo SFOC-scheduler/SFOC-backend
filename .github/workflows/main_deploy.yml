@@ -10,7 +10,6 @@ name: Main CD
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -62,7 +61,7 @@ jobs:
           echo "KAKAO_OAUTH_CLIENT_SECRET=${{ secrets.KAKAO_OAUTH_CLIENT_SECRET }}" >> .env
           echo "KEY_STORE_PASSWORD=${{ secrets.KEY_STORE_PASSWORD }}" >> .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env          
 
     - name: Deploy
       uses: appleboy/ssh-action@master
