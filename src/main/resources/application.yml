@@ -56,7 +56,7 @@ spring:
             user-name-attribute: id
   data:
     redis:
-      host: localhost
+      host: ${REDIS_HOST}
       port: 6379
       password: ${REDIS_PASSWORD}
 
