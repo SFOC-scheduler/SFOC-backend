@@ -6,4 +6,5 @@ import java.util.Optional;
 
 public interface RefreshTokenRepository extends CrudRepository<RefreshToken, Long> {
     Optional<RefreshToken> findByContent(String content);
+    boolean existsByContent(String content);
 }

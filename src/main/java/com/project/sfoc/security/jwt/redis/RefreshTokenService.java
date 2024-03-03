@@ -13,15 +13,14 @@ public class RefreshTokenService {
 
     @Transactional(readOnly = true)
     public boolean isValid(String content) {
-        return refreshTokenRepository.findByContent(content)
-                .map(RefreshToken::getIsValid)
-                .orElseThrow(() -> new IllegalArgumentException("없는 refresh token"));
+        return refreshTokenRepository.existsByContent(content);
     }
 
-    public void addToBlacklist(String content) {
-        refreshTokenRepository.findByContent(content)
-                .map(RefreshToken::addToBlacklist)
-                .orElseThrow(() -> new IllegalArgumentException("일치하는 refresh token 존재하지 않음"));
+    public void deleteRefreshToken(String content) {
+        refreshTokenRepository.delete(
+                refreshTokenRepository.findByContent(content)
+                        .orElseThrow(() -> new IllegalArgumentException("일치하는 refresh token 존재하지 않음"))
+        );
     }
 
 }

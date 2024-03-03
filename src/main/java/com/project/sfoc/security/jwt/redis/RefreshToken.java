@@ -18,14 +18,8 @@ public class RefreshToken {
     private Long userId;
     @Indexed
     private String content;
-    private Boolean isValid;
 
     public static RefreshToken of(Long userId, String content) {
-        return new RefreshToken(userId, content, true);
-    }
-
-    public RefreshToken addToBlacklist() {
-        this.isValid = false;
-        return this;
+        return new RefreshToken(userId, content);
     }
 }
