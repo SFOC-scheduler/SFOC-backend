@@ -2,6 +2,7 @@ package com.project.sfoc.security.jwt;
 
 import com.project.sfoc.security.jwt.redis.RefreshToken;
 import com.project.sfoc.security.jwt.redis.RefreshTokenRepository;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.jackson.io.JacksonDeserializer;
 import io.jsonwebtoken.lang.Maps;
@@ -79,6 +80,20 @@ public class JwtUtil {
         refreshTokenRepository.save(RefreshToken.of(id, refreshToken));
 
         return refreshToken;
+    }
+
+    public boolean isNotExpired(String token) {
+        try {
+            return !Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getExpiration()
+                    .before(new Date());
+        } catch (ExpiredJwtException e) {
+            return false;
+        }
     }
 
     public UserClaims getUserClaims(String token) {
