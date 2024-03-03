@@ -28,7 +28,7 @@ public class JwtUtil {
     public static final long REFRESH_EXPIRED_MS = 1_209_600_000;  // 2주
     private static final String ISSUER = "sfoc";
     private static final String TOKEN_TYPE = "token_type";
-    private static final String USER_CLAIMS = "user_claims";
+    private static final String USER_INFO = "user_info";
     private static final String TOKEN_PARAM = "token";
     private static final String CALLBACK_URL = "https://sfoc-scheduler.github.io/SFOC-frontend/login/callback";
 
@@ -55,11 +55,11 @@ public class JwtUtil {
     }
 
     private String createAccessToken(Long id, String role) {
-        UserClaims userClaims = UserClaims.of(id, role);
+        UserInfo userInfo = UserInfo.of(id, role);
         return Jwts.builder()
                 .issuer(ISSUER)
                 .claim(TOKEN_TYPE, ACCESS_TYPE)
-                .claim(USER_CLAIMS, userClaims)
+                .claim(USER_INFO, userInfo)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRED_MS))
                 .signWith(secretKey)
@@ -67,11 +67,11 @@ public class JwtUtil {
     }
 
     private String createRefreshToken(Long id, String role) {
-        UserClaims userClaims = UserClaims.of(id, role);
+        UserInfo userInfo = UserInfo.of(id, role);
         String refreshToken = Jwts.builder()
                 .issuer(ISSUER)
                 .claim(TOKEN_TYPE, REFRESH_TYPE)
-                .claim(USER_CLAIMS, userClaims)
+                .claim(USER_INFO, userInfo)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + REFRESH_EXPIRED_MS))
                 .signWith(secretKey)
@@ -96,14 +96,14 @@ public class JwtUtil {
         }
     }
 
-    public UserClaims getUserClaims(String token) {
+    public UserInfo getUserInfo(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
-                .json(new JacksonDeserializer(Maps.of(USER_CLAIMS, UserClaims.class).build()))
+                .json(new JacksonDeserializer(Maps.of(USER_INFO, UserInfo.class).build()))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
-                .get(USER_CLAIMS, UserClaims.class);
+                .get(USER_INFO, UserInfo.class);
     }
 
     public String createCookie(String name, String value) {

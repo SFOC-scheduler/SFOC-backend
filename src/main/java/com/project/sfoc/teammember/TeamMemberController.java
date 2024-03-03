@@ -1,6 +1,6 @@
 package com.project.sfoc.teammember;
 
-import com.project.sfoc.security.jwt.UserClaims;
+import com.project.sfoc.security.jwt.UserInfo;
 import com.project.sfoc.teammember.dto.DeleteTeamMemberDto;
 import com.project.sfoc.teammember.dto.TeamMemberResponseDto;
 import com.project.sfoc.teammember.dto.UpdateTeamGrantDto;
@@ -22,8 +22,8 @@ public class TeamMemberController {
     @GetMapping("{teamId}/members")
     public ResponseEntity<List<TeamMemberResponseDto>> findAllTeamMembers(@PathVariable Long teamId, Authentication authentication) {
 
-        UserClaims userClaim = (UserClaims) authentication.getPrincipal();
-        Long userId = userClaim.id();
+        UserInfo userInfo = (UserInfo) authentication.getPrincipal();
+        Long userId = userInfo.id();
 
         List<TeamMemberResponseDto> teamMembers = teamMemberService.findTeamMembers(teamId, userId);
 
@@ -34,8 +34,8 @@ public class TeamMemberController {
     public ResponseEntity<DeleteTeamMemberDto> deleteTeamMember(@RequestBody DeleteTeamMemberDto deleteTeamMemberDto,
                                                                 @PathVariable Long teamId, Authentication authentication) {
 
-        UserClaims userClaim = (UserClaims) authentication.getPrincipal();
-        Long userId = userClaim.id();
+        UserInfo userInfo = (UserInfo) authentication.getPrincipal();
+        Long userId = userInfo.id();
 
         teamMemberService.deleteTeamMember(deleteTeamMemberDto, teamId, userId);
 
@@ -46,8 +46,8 @@ public class TeamMemberController {
     public ResponseEntity<UpdateTeamGrantDto> updateTeamGrant(@RequestBody UpdateTeamGrantDto updateTeamGrantDto,
                                                               @PathVariable Long teamId, Authentication authentication) {
 
-        UserClaims userClaim = (UserClaims) authentication.getPrincipal();
-        Long userId = userClaim.id();
+        UserInfo userInfo = (UserInfo) authentication.getPrincipal();
+        Long userId = userInfo.id();
 
         UpdateTeamGrantDto updateDto = teamMemberService.updateTeamGrant(updateTeamGrantDto, teamId, userId);
 

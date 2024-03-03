@@ -39,18 +39,18 @@ public class JwtFilter extends OncePerRequestFilter {
         Optional<String> refreshToken = jwtUtil.resolveRefreshToken(request);
 
         accessToken.filter(jwtUtil::isNotExpired)
-                .map(jwtUtil::getUserClaims)
-                .map(claims -> createAuthenticationToken(claims, request))
+                .map(jwtUtil::getUserInfo)
+                .map(userInfo -> createAuthenticationToken(userInfo, request))
                 .ifPresentOrElse(this::setAuthentication, () -> handleReIssuanceOrFailure(refreshToken, response));
 
         filterChain.doFilter(request, response);
     }
 
-    private Authentication createAuthenticationToken(UserClaims claims, HttpServletRequest request) {
+    private Authentication createAuthenticationToken(UserInfo userInfo, HttpServletRequest request) {
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                claims,
+                userInfo,
                 null,
-                List.of(new SimpleGrantedAuthority(claims.role())));
+                List.of(new SimpleGrantedAuthority(userInfo.role())));
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         return authentication;
     }
@@ -63,8 +63,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private void handleReIssuanceOrFailure(Optional<String> refreshToken, HttpServletResponse response) {
         refreshToken.filter(jwtUtil::isNotExpired)
                 .filter(refreshTokenService::isValid)
-                .map(jwtUtil::getUserClaims)
-                .map(claims -> jwtUtil.createTokens(claims.id(), claims.role()))
+                .map(jwtUtil::getUserInfo)
+                .map(userInfo -> jwtUtil.createTokens(userInfo.id(), userInfo.role()))
                 .ifPresentOrElse(tokenDto -> handleReIssuance(tokenDto, response), this::handleAuthenticationFailure);
     }
 
