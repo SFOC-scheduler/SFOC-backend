@@ -2,6 +2,7 @@ package com.project.sfoc.security;
 
 import com.project.sfoc.entity.user.Grant;
 import com.project.sfoc.security.jwt.JwtFilter;
+import com.project.sfoc.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -30,6 +32,7 @@ public class SecurityConfig {
 
     private final OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
     private final CustomAuthenticationSuccessHandler authenticationSuccessHandler;
+    private final CustomLogoutHandler logoutHandler;
     private final JwtFilter jwtFilter;
 
     @Bean
@@ -48,6 +51,11 @@ public class SecurityConfig {
                         .successHandler(authenticationSuccessHandler)
                         .userInfoEndpoint(user -> user.userService(oAuth2UserService))
                 )
+                .logout(logout -> logout
+                        .logoutUrl("/api/logout")
+                        .deleteCookies(JwtUtil.REFRESH_TYPE)
+                        .addLogoutHandler(logoutHandler)
+                        .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterAfter(jwtFilter, LogoutFilter.class)
                 .build();
