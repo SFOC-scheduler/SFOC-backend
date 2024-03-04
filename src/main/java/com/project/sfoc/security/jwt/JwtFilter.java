@@ -41,9 +41,8 @@ public class JwtFilter extends OncePerRequestFilter {
         accessToken.filter(jwtUtil::isNotExpired)
                 .map(jwtUtil::getUserInfo)
                 .map(userInfo -> createAuthenticationToken(userInfo, request))
-                .ifPresentOrElse(this::setAuthentication, () -> handleReIssuanceOrFailure(refreshToken, response));
-
-        filterChain.doFilter(request, response);
+                .ifPresentOrElse((auth) -> setAuthentication(auth, request, response, filterChain),
+                        () -> handleReIssuanceOrFailure(refreshToken, request, response, filterChain));
     }
 
     private Authentication createAuthenticationToken(UserInfo userInfo, HttpServletRequest request) {
@@ -55,17 +54,23 @@ public class JwtFilter extends OncePerRequestFilter {
         return authentication;
     }
 
-    private void setAuthentication(Authentication authentication) {
+    private void setAuthentication(Authentication authentication, HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         log.info("인증 완료");
+        try {
+            filterChain.doFilter(request, response);
+        } catch (IOException | ServletException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void handleReIssuanceOrFailure(Optional<String> refreshToken, HttpServletResponse response) {
+    private void handleReIssuanceOrFailure(Optional<String> refreshToken, HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
         refreshToken.filter(jwtUtil::isNotExpired)
                 .filter(refreshTokenService::isValid)
                 .map(jwtUtil::getUserInfo)
                 .map(userInfo -> jwtUtil.createTokens(userInfo.id(), userInfo.role()))
-                .ifPresentOrElse(tokenDto -> handleReIssuance(tokenDto, response), this::handleAuthenticationFailure);
+                .ifPresentOrElse(tokenDto -> handleReIssuance(tokenDto, response),
+                        () -> handleAuthenticationFailure(request, response, filterChain));
     }
 
     private void handleReIssuance(TokenDto tokenDto, HttpServletResponse response){
@@ -79,8 +84,13 @@ public class JwtFilter extends OncePerRequestFilter {
         }
     }
 
-    private void handleAuthenticationFailure() {
+    private void handleAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
         log.info("인증 실패");
+        try {
+            filterChain.doFilter(request, response);
+        } catch (IOException | ServletException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
