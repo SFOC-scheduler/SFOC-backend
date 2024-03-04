@@ -1,4 +1,4 @@
-package com.project.sfoc.security;
+package com.project.sfoc.security.oauth2;
 
 import com.project.sfoc.entity.Provider;
 import lombok.RequiredArgsConstructor;

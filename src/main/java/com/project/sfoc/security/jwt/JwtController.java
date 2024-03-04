@@ -1,4 +1,4 @@
-package com.project.sfoc.security;
+package com.project.sfoc.security.jwt;
 
 import com.project.sfoc.security.jwt.UserInfo;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +12,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/oauth")
 public class OAuthController {
+public class JwtController {
 
     @GetMapping("/loginInfo")
     public ResponseEntity<UserInfo> oauthLoginInfo(@AuthenticationPrincipal UserInfo userInfo) {

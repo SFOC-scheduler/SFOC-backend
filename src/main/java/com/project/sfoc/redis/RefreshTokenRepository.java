@@ -1,4 +1,4 @@
-package com.project.sfoc.security.jwt.redis;
+package com.project.sfoc.redis;
 
 import org.springframework.data.repository.CrudRepository;
 

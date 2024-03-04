@@ -1,4 +1,4 @@
-package com.project.sfoc.security.jwt.redis;
+package com.project.sfoc.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

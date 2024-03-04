@@ -1,4 +1,4 @@
-package com.project.sfoc.security.jwt.redis;
+package com.project.sfoc.redis;
 
 import com.project.sfoc.security.jwt.JwtUtil;
 import lombok.AccessLevel;

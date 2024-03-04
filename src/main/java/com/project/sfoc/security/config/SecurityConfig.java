@@ -1,7 +1,9 @@
-package com.project.sfoc.security;
+package com.project.sfoc.security.config;
 
 import com.project.sfoc.entity.user.Grant;
-import com.project.sfoc.security.jwt.JwtFilter;
+import com.project.sfoc.security.handler.CustomAuthenticationSuccessHandler;
+import com.project.sfoc.security.handler.CustomLogoutHandler;
+import com.project.sfoc.security.jwt.AccessTokenFilter;
 import com.project.sfoc.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -33,7 +35,7 @@ public class SecurityConfig {
     private final OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
     private final CustomAuthenticationSuccessHandler authenticationSuccessHandler;
     private final CustomLogoutHandler logoutHandler;
-    private final JwtFilter jwtFilter;
+    private final AccessTokenFilter accessTokenFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -57,7 +59,7 @@ public class SecurityConfig {
                         .addLogoutHandler(logoutHandler)
                         .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterAfter(jwtFilter, LogoutFilter.class)
+                .addFilterAfter(accessTokenFilter, LogoutFilter.class)
                 .build();
     }
 
