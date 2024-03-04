@@ -19,7 +19,7 @@ public class TeamMemberController {
     private final TeamMemberService teamMemberService;
 
 
-    @GetMapping("{teamId}/members")
+    @GetMapping("/{teamId}/members")
     public ResponseEntity<List<TeamMemberResponseDto>> findAllTeamMembers(@PathVariable Long teamId, Authentication authentication) {
 
         UserInfo userInfo = (UserInfo) authentication.getPrincipal();

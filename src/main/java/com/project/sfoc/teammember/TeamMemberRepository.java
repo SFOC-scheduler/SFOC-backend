@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
 
 
-    boolean existsByUserNicknameAndTeam(String userNickname, Team team);
+    boolean existsByUserNicknameAndTeam_Id(String userNickname, Long teamId);
 
 
     List<TeamMember> findByTeam_Id(Long teamId);
