@@ -1,6 +1,6 @@
 package com.project.sfoc.security.oauth2;
 
-import com.project.sfoc.entity.Provider;
+import com.project.sfoc.entity.user.Provider;
 import com.project.sfoc.entity.user.User;
 
 public record OAuth2UserInfo(

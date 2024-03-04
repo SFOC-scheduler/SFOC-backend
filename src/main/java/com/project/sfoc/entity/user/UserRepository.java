@@ -1,6 +1,5 @@
 package com.project.sfoc.entity.user;
 
-import com.project.sfoc.entity.Provider;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

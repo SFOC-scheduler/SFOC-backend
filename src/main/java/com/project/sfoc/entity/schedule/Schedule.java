@@ -1,4 +1,4 @@
-package com.project.sfoc.entity;
+package com.project.sfoc.entity.schedule;
 
 import com.project.sfoc.entity.teammember.TeamMember;
 import jakarta.persistence.*;
@@ -20,28 +20,21 @@ public class Schedule {
     private String memo;
 
     @Enumerated(EnumType.STRING)
-    private PeriodType period_type;
+    private PeriodType periodType;
     private String period;
 
-    @Column(name = "is_dday")
-    private Boolean isDDay;
+    private Boolean isEnableDday;
 
-    @Column(name = "start_time")
     private LocalDateTime startTime;
 
-    @Column(name ="end_time")
     private LocalDateTime endTime;
 
     @ManyToOne
     @JoinColumn(name = "team_member_id")
     private TeamMember teamMember;
 
-    @Column(name = "period_count")
     private Long periodCount;
 
-    @Column(name = "period_end_time")
     private LocalDateTime periodEndTime;
-
-
 
 }

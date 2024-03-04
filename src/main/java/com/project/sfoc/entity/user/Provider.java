@@ -1,4 +1,4 @@
-package com.project.sfoc.entity;
+package com.project.sfoc.entity.user;
 
 public enum Provider {
     KAKAO, GOOGLE
