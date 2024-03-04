@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/login", "/oauth/loginInfo").permitAll()
                         .anyRequest().authenticated()
                 )
+                .formLogin(AbstractHttpConfigurer::disable)
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(authenticationSuccessHandler)
                         .userInfoEndpoint(user -> user.userService(oAuth2UserService))
