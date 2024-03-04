@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/**").hasRole(Grant.ADMIN.name())
-                        .requestMatchers(HttpMethod.GET, "/login", "/oauth/loginInfo").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/login/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
