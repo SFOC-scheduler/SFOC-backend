@@ -1,6 +1,5 @@
 package com.project.sfoc.entity.user;
 
-import com.project.sfoc.entity.Provider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
