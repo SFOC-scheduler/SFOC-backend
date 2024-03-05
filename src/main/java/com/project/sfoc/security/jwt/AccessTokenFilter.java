@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -31,11 +32,16 @@ public class AccessTokenFilter extends OncePerRequestFilter {
         log.info("접속자 ip={}", request.getRemoteAddr());
         log.info("요청 URI={}", request.getRequestURI());
 
-        // TODO - jwt 만료 예외 처리
+        if (AntPathRequestMatcher.antMatcher("/api/login/reissue").matches(request)) {
+            log.info("AccessTokenFilter 우회");
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String accessToken = httpUtil.resolveAccessToken(request);
         log.info("accessToken={}", accessToken);
 
-        UserInfo userInfo = jwtUtil.getUserInfo(accessToken);
+        UserInfo userInfo = jwtUtil.getUserInfoFromAccessToken(accessToken);
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(
                         userInfo,

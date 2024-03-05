@@ -1,7 +1,9 @@
 package com.project.sfoc.security.jwt;
 
+import com.project.sfoc.exception.Error;
 import com.project.sfoc.security.HttpUtil;
 import com.project.sfoc.redis.RefreshTokenService;
+import com.project.sfoc.exception.RefreshTokenException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +20,7 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/login")
+@RequestMapping("/api/login")
 @Slf4j
 public class JwtController {
 
@@ -38,13 +40,14 @@ public class JwtController {
     public ResponseEntity<String> refreshTokens(HttpServletResponse response,
                                                   @CookieValue(value = HttpUtil.REFRESH_TYPE) Cookie cookie) {
         String refreshToken = cookie.getValue();
+
         if (!refreshTokenService.isValid(refreshToken)) {
-            throw new RuntimeException("유효하지 않은 refresh token");
+            throw new RefreshTokenException(Error.INVALID_TOKEN);
         }
 
         log.info("refreshToken={}", refreshToken);
 
-        UserInfo userInfo = jwtUtil.getUserInfo(refreshToken);
+        UserInfo userInfo = jwtUtil.getUserInfoFromRefreshToken(refreshToken);
         TokenDto tokenDto = jwtUtil.createTokens(userInfo.id(), userInfo.role());
         log.info("token 재발급, access={}, refresh={}", tokenDto.accessToken(), tokenDto.refreshToken());
 

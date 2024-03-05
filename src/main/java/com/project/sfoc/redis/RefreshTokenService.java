@@ -1,5 +1,7 @@
 package com.project.sfoc.redis;
 
+import com.project.sfoc.exception.Error;
+import com.project.sfoc.exception.RefreshTokenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +21,7 @@ public class RefreshTokenService {
     public void deleteRefreshToken(String content) {
         refreshTokenRepository.delete(
                 refreshTokenRepository.findByContent(content)
-                        .orElseThrow(() -> new IllegalArgumentException("일치하는 refresh token 존재하지 않음"))
+                        .orElseThrow(() -> new RefreshTokenException(Error.INVALID_TOKEN))
         );
     }
 

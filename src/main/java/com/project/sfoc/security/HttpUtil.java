@@ -1,5 +1,8 @@
 package com.project.sfoc.security;
 
+import com.project.sfoc.exception.Error;
+import com.project.sfoc.exception.AccessTokenException;
+import com.project.sfoc.exception.RefreshTokenException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseCookie;
@@ -33,7 +36,7 @@ public class HttpUtil {
         return Optional.ofNullable(request.getHeader(ACCESS_HEADER))
                 .filter(authorization -> authorization.startsWith("Bearer "))
                 .map(authorization -> authorization.split(" ")[1])
-                .orElseThrow(() -> new IllegalArgumentException("access token 없음"));
+                .orElseThrow(() -> new AccessTokenException(Error.INVALID_TOKEN));
     }
 
     public String resolveRefreshToken(HttpServletRequest request) {
@@ -42,7 +45,7 @@ public class HttpUtil {
                         .filter(cookie -> cookie.getName().equals(REFRESH_TYPE))
                         .findFirst()
                         .map(Cookie::getValue))
-                .orElseThrow(() -> new IllegalArgumentException("refresh token 없음"));
+                .orElseThrow(() -> new RefreshTokenException(Error.INVALID_TOKEN));
     }
 
     public String getRedirectUrl(String accessToken) {

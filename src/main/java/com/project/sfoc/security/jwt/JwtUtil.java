@@ -1,7 +1,11 @@
 package com.project.sfoc.security.jwt;
 
+import com.project.sfoc.exception.Error;
 import com.project.sfoc.redis.RefreshToken;
 import com.project.sfoc.redis.RefreshTokenRepository;
+import com.project.sfoc.exception.AccessTokenException;
+import com.project.sfoc.exception.RefreshTokenException;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.jackson.io.JacksonDeserializer;
 import io.jsonwebtoken.lang.Maps;
@@ -72,7 +76,7 @@ public class JwtUtil {
         return refreshToken;
     }
 
-    public UserInfo getUserInfo(String token) {
+    private UserInfo getUserInfo(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
                 .json(new JacksonDeserializer(Maps.of(USER_INFO, UserInfo.class).build()))
@@ -80,6 +84,22 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload()
                 .get(USER_INFO, UserInfo.class);
+    }
+
+    public UserInfo getUserInfoFromAccessToken(String token) {
+        try {
+            return getUserInfo(token);
+        } catch (ExpiredJwtException e) {
+            throw new AccessTokenException(Error.EXPIRED_ACCESS_TOKEN);
+        }
+    }
+
+    public UserInfo getUserInfoFromRefreshToken(String token) {
+        try {
+            return getUserInfo(token);
+        } catch (ExpiredJwtException e) {
+            throw new RefreshTokenException(Error.EXPIRED_REFRESH_TOKEN);
+        }
     }
 
 }

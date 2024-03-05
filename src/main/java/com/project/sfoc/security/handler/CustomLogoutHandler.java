@@ -1,7 +1,10 @@
 package com.project.sfoc.security.handler;
 
+import com.project.sfoc.exception.Error;
+import com.project.sfoc.exception.RefreshTokenException;
 import com.project.sfoc.security.HttpUtil;
 import com.project.sfoc.redis.RefreshTokenService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +25,10 @@ public class CustomLogoutHandler implements LogoutHandler {
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         String refreshToken = httpUtil.resolveRefreshToken(request);
 
-        if (!refreshTokenService.isValid(refreshToken)) {
-            throw new RuntimeException("일치하는 refresh token이 없음");
+        if (refreshTokenService.isValid(refreshToken)) {
+            refreshTokenService.deleteRefreshToken(refreshToken);
+            log.info("logout 완료");
         }
-
-        refreshTokenService.deleteRefreshToken(refreshToken);
-        log.info("logout 완료");
     }
 
 }
