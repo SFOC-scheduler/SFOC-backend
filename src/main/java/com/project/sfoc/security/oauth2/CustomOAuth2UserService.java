@@ -1,4 +1,4 @@
-package com.project.sfoc.security;
+package com.project.sfoc.security.oauth2;
 
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.entity.user.UserRepository;
