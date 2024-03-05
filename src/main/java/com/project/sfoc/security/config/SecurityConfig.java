@@ -39,7 +39,7 @@ public class SecurityConfig {
     private final AccessTokenFilter accessTokenFilter;
     private final TokenExceptionHandlerFilter tokenExceptionHandlerFilter;
 
-    private static final String homeUrl = "https://sfoc-scheduler.github.io/SFOC-frontend";
+    private static final String homeUrl = "https://sfoc-scheduler.github.io";
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
