@@ -30,7 +30,7 @@ public class JwtUtil {
     private static final String TOKEN_TYPE = "token_type";
     private static final String USER_INFO = "user_info";
     private static final String TOKEN_PARAM = "token";
-    private static final String CALLBACK_URL = "https://sfoc-scheduler.github.io/SFOC-frontend/login/callback";
+    private static final String CALLBACK_URL = "https://sfoc-scheduler.github.io/SFOC-frontend";
 
     public static final String ACCESS_HEADER = "Authorization";
     public static final String ACCESS_TYPE = "AccessToken";
