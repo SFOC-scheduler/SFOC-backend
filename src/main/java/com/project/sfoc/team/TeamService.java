@@ -27,26 +27,30 @@ public class TeamService {
     private final TeamMemberRepository teamMemberRepository;
 
 
+    //TODO 팀 중복 어떻게?
     public void createTeam(TeamRequestDto teamRequestDto, Long userId) {
-        final Team team = teamRequestDto.toEntity(createInvitationCode());
-        teamRepository.save(team);
+        Team team = teamRequestDto.toEntity(createInvitationCode());
+        Team savedteam = teamRepository.save(team);
 
-        entryTeam(TeamMemberDto.of(userId, team.getId(), teamRequestDto.userNickname(), HIGHEST_ADMIN));
-
+        entryTeam(TeamMemberDto.of(userId, savedteam.getId(), teamRequestDto.userNickname(), HIGHEST_ADMIN));
     }
 
-    //TODO: 같은 user 중복 방지
 
     public TeamMemberDto entryTeam(TeamMemberDto teamMemberDto) {
+
+
+        if (isPresentTeamMember(teamMemberDto.teamId(),teamMemberDto.userId())) {
+            log.info("이미 팀에 존재합니다.");
+            throw new IllegalArgumentException();
+        }
 
         User user = findUserByUserId(teamMemberDto.userId());
         Team team = findTeamByTeamId(teamMemberDto.teamId());
 
-        if (isDuplicateTeamUserNickname(teamMemberDto.userNickname(), team)) {
+        if (isDuplicateTeamUserNickname(teamMemberDto.userNickname(), teamMemberDto.teamId())) {
             log.info("닉네임 중복 오류");
             throw new IllegalArgumentException();
         }
-
 
         TeamMember teamMember = teamMemberDto.toEntity(team.getName(), user, team);
         teamMemberRepository.save(teamMember);
@@ -60,6 +64,7 @@ public class TeamService {
         Team team = findTeamByTeamId(teamId);
         TeamMember teamMember = findTeamMemberByTeamAndUser(teamId, userId);
         TeamGrant teamGrant = teamMember.getTeamGrant();
+
         if(teamGrant == NORMAL) {
             return AbstractTeamInfoDto.from(teamMember);
 
@@ -69,6 +74,7 @@ public class TeamService {
 
     }
 
+    // TODO 팀 권한에 따라 분리 시키기
     public void updateTeamInfo(UpdateTeamInfo teamInfoDto, Long teamId, Long userId) {
         TeamMember teamMember = findTeamMemberByTeamAndUser(teamId, userId);
 
@@ -81,6 +87,12 @@ public class TeamService {
             teamMember.update(teamInfoDto.teamNickname(), teamInfoDto.userNickname());
 
         } else {
+
+            if (isDuplicateTeamUserNickname(teamInfoDto.userNickname(), teamId)) {
+                log.info("닉네임 중복 오류");
+                throw new IllegalArgumentException();
+            }
+
             teamMember.update(teamInfoDto.teamNickname(), teamInfoDto.userNickname());
         }
 
@@ -101,8 +113,12 @@ public class TeamService {
         return teamRepository.existsByInvitationCode(code);
     }
 
-    private boolean isDuplicateTeamUserNickname(String userNickname, Team team) {
-        return teamMemberRepository.existsByUserNicknameAndTeam(userNickname, team);
+    private boolean isPresentTeamMember(Long teamId, Long userId) {
+        return teamMemberRepository.existsByTeam_IdAndUser_Id(teamId, userId);
+    }
+
+    private boolean isDuplicateTeamUserNickname(String userNickname, Long teamId) {
+        return teamMemberRepository.existsByUserNicknameAndTeam_Id(userNickname, teamId);
     }
 
     private Team findTeamByTeamId(Long teamId) {
@@ -116,6 +132,5 @@ public class TeamService {
     private TeamMember findTeamMemberByTeamAndUser(Long teamId, Long userId) {
         return teamMemberRepository.findByTeam_IdAndUser_Id(teamId, userId).orElseThrow(IllegalArgumentException::new);
     }
-
 
 }
