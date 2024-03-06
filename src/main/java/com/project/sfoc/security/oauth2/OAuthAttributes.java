@@ -1,4 +1,4 @@
-package com.project.sfoc.security;
+package com.project.sfoc.security.oauth2;
 
 import com.project.sfoc.entity.Provider;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public enum OAuthAttributes {
         return Arrays.stream(values())
                 .filter(provider -> registrationId.equals(provider.registrationId))
                 .findFirst()
-                .orElseThrow(IllegalArgumentException::new)
+                .orElseThrow(() -> new IllegalArgumentException("일치하는 provider 없음"))
                 .of.apply(attributes);
     }
 

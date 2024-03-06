@@ -1,7 +1,9 @@
-package com.project.sfoc.security;
+package com.project.sfoc.security.handler;
 
+import com.project.sfoc.security.HttpUtil;
 import com.project.sfoc.security.jwt.JwtUtil;
 import com.project.sfoc.security.jwt.TokenDto;
+import com.project.sfoc.security.oauth2.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtUtil jwtUtil;
+    private final HttpUtil httpUtil;
 
     @Override
     @Transactional
@@ -30,8 +33,8 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         TokenDto tokenDto = createToken(authentication);
         log.info("token 발급, access={}, refresh={}", tokenDto.accessToken(), tokenDto.refreshToken());
 
-        response.setHeader(HttpHeaders.SET_COOKIE, jwtUtil.createCookie(JwtUtil.REFRESH_TYPE, tokenDto.refreshToken()));
-        getRedirectStrategy().sendRedirect(request, response, jwtUtil.getRedirectUrl(tokenDto.accessToken()));
+        response.setHeader(HttpHeaders.SET_COOKIE, httpUtil.createCookie(JwtUtil.REFRESH_TYPE, tokenDto.refreshToken()));
+        getRedirectStrategy().sendRedirect(request, response, httpUtil.getRedirectUrl(tokenDto.accessToken()));
     }
 
     private TokenDto createToken(Authentication authentication) {
