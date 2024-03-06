@@ -1,6 +1,6 @@
-package com.project.sfoc.team.dto;
+package com.project.sfoc.entity.team.dto;
 
-import com.project.sfoc.team.Disclosure;
+import com.project.sfoc.entity.team.Disclosure;
 import lombok.Getter;
 
 @Getter

@@ -1,4 +1,4 @@
-package com.project.sfoc.team;
+package com.project.sfoc.entity.team;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

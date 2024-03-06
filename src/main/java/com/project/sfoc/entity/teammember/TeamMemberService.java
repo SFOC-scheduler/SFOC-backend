@@ -1,8 +1,8 @@
-package com.project.sfoc.teammember;
+package com.project.sfoc.entity.teammember;
 
-import com.project.sfoc.teammember.dto.DeleteTeamMemberDto;
-import com.project.sfoc.teammember.dto.TeamMemberResponseDto;
-import com.project.sfoc.teammember.dto.UpdateTeamGrantDto;
+import com.project.sfoc.entity.teammember.dto.DeleteTeamMemberDto;
+import com.project.sfoc.entity.teammember.dto.TeamMemberResponseDto;
+import com.project.sfoc.entity.teammember.dto.UpdateTeamGrantDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

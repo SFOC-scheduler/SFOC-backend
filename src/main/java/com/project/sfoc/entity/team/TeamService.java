@@ -1,11 +1,14 @@
-package com.project.sfoc.team;
+package com.project.sfoc.entity.team;
 
-import com.project.sfoc.team.dto.*;
-import com.project.sfoc.teammember.TeamGrant;
-import com.project.sfoc.teammember.TeamMember;
+import com.project.sfoc.entity.team.dto.AbstractTeamInfoDto;
+import com.project.sfoc.entity.team.dto.TeamMemberDto;
+import com.project.sfoc.entity.team.dto.TeamRequestDto;
+import com.project.sfoc.entity.team.dto.UpdateTeamInfo;
+import com.project.sfoc.entity.teammember.TeamGrant;
+import com.project.sfoc.entity.teammember.TeamMember;
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.entity.user.UserRepository;
-import com.project.sfoc.teammember.TeamMemberRepository;
+import com.project.sfoc.entity.teammember.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static com.project.sfoc.teammember.TeamGrant.*;
+import static com.project.sfoc.entity.teammember.TeamGrant.*;
 
 
 @Service

@@ -1,4 +1,4 @@
-package com.project.sfoc.team;
+package com.project.sfoc.entity.team;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

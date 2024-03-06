@@ -1,8 +1,8 @@
-package com.project.sfoc.team.dto;
+package com.project.sfoc.entity.team.dto;
 
+import com.project.sfoc.entity.team.Disclosure;
+import com.project.sfoc.entity.team.Team;
 import com.project.sfoc.global.vaild.ValidEnum;
-import com.project.sfoc.team.Disclosure;
-import com.project.sfoc.team.Team;
 import jakarta.validation.constraints.NotNull;
 
 public record TeamRequestDto(

@@ -1,6 +1,5 @@
-package com.project.sfoc.teammember;
+package com.project.sfoc.entity.teammember;
 
-import com.project.sfoc.team.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
