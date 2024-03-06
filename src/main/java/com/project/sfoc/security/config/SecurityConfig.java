@@ -1,7 +1,10 @@
-package com.project.sfoc.security;
+package com.project.sfoc.security.config;
 
 import com.project.sfoc.entity.user.Grant;
-import com.project.sfoc.security.jwt.JwtFilter;
+import com.project.sfoc.exception.TokenExceptionHandlerFilter;
+import com.project.sfoc.security.handler.CustomAuthenticationSuccessHandler;
+import com.project.sfoc.security.handler.CustomLogoutHandler;
+import com.project.sfoc.security.jwt.AccessTokenFilter;
 import com.project.sfoc.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -16,9 +19,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,7 +36,10 @@ public class SecurityConfig {
     private final OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
     private final CustomAuthenticationSuccessHandler authenticationSuccessHandler;
     private final CustomLogoutHandler logoutHandler;
-    private final JwtFilter jwtFilter;
+    private final AccessTokenFilter accessTokenFilter;
+    private final TokenExceptionHandlerFilter tokenExceptionHandlerFilter;
+
+    private static final String homeUrl = "https://sfoc-scheduler.github.io";
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -44,9 +50,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/**").hasRole(Grant.ADMIN.name())
-                        .requestMatchers(HttpMethod.GET, "/login", "/oauth/loginInfo").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/oauth2/authorization/*", "/api/login/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .formLogin(AbstractHttpConfigurer::disable)
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(authenticationSuccessHandler)
                         .userInfoEndpoint(user -> user.userService(oAuth2UserService))
@@ -57,7 +64,8 @@ public class SecurityConfig {
                         .addLogoutHandler(logoutHandler)
                         .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterAfter(jwtFilter, LogoutFilter.class)
+                .addFilterAfter(accessTokenFilter, OAuth2LoginAuthenticationFilter.class)
+                .addFilterBefore(tokenExceptionHandlerFilter, AccessTokenFilter.class)
                 .build();
     }
 
@@ -65,7 +73,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Collections.singletonList("https://sfoc-scheduler.github.io/SFOC-frontend/"));
+        configuration.setAllowedOrigins(Collections.singletonList(homeUrl));
         configuration.setAllowedMethods(Collections.singletonList("*"));
         configuration.setAllowedHeaders(Collections.singletonList("*"));
         configuration.setExposedHeaders(Collections.singletonList(HttpHeaders.AUTHORIZATION));

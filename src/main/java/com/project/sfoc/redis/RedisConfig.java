@@ -1,4 +1,4 @@
-package com.project.sfoc.security.jwt.redis;
+package com.project.sfoc.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
