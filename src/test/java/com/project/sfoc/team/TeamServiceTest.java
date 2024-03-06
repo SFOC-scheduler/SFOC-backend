@@ -65,12 +65,6 @@ class TeamServiceTest {
 
     }
 
-    @Test
-    public void test() {
-        TeamRequestDto teamRequestDto = new TeamRequestDto("team1", "팀에 대한 설명입니다.", Disclosure.PUBLIC, "abc");
-        given(teamRequestDto.toEntity(any(String.class))).willReturn(team);
-
-    }
 
     @Test
     @DisplayName("팀 생성 테스트")
