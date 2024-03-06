@@ -3,6 +3,7 @@ package com.project.sfoc.team;
 import com.navercorp.fixturemonkey.ArbitraryBuilder;
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.FieldReflectionArbitraryIntrospector;
+import com.project.sfoc.entity.Provider;
 import com.project.sfoc.entity.team.Disclosure;
 import com.project.sfoc.entity.team.Team;
 import com.project.sfoc.entity.team.TeamRepository;
@@ -247,6 +248,7 @@ class TeamServiceTest {
     @DisplayName("관리자가 팀 정보 업데이트 테스트")
     public void teamService_UpdateTeamMemberAndTeam_Return_Void() {
         //Given
+
         UpdateTeamInfo updateTeamInfo = new UpdateTeamInfo("team update", "팀이 변경되었습니다.",
                 Disclosure.APPROVAL, "팀 변경 닉네임", "유저 변경 닉네임");
 
@@ -269,10 +271,15 @@ class TeamServiceTest {
 
     }
 
+    // TODO: fixturemonkey 랜덤 값 반환 생각해서 테스트 짜기
     @Test
     @DisplayName("일반 구성원이 팀 정보 업데이트 테스트")
     public void teamService_UpdateTeamMember_Return_Void() {
         //Given
+
+        team = Team.of("team1", "1234", "팀에 대한 설명입니다.", Disclosure.PUBLIC);
+        user = User.of(Provider.GOOGLE, "abcd@gmail.com", "12345678901234567890");
+
         UpdateTeamInfo updateTeamInfo = new UpdateTeamInfo("team update", "팀이 변경되었습니다.",
                 Disclosure.APPROVAL, "팀 변경 닉네임", "유저 변경 닉네임");
         TeamMember teamMember = TeamMember.of("팀 닉네임", "유저 닉네임", NORMAL, user, team);
