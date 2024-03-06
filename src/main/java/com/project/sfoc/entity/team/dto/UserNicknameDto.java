@@ -1,4 +1,4 @@
-package com.project.sfoc.team.dto;
+package com.project.sfoc.entity.team.dto;
 
 
 import jakarta.validation.constraints.NotNull;

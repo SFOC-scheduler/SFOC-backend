@@ -1,7 +1,7 @@
-package com.project.sfoc.team;
+package com.project.sfoc.entity.team;
 
-import com.project.sfoc.team.dto.*;
-import com.project.sfoc.teammember.TeamGrant;
+import com.project.sfoc.entity.team.dto.*;
+import com.project.sfoc.entity.teammember.TeamGrant;
 import com.project.sfoc.security.jwt.UserInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class TeamController {
 
     @PatchMapping("/{teamId}")
     public ResponseEntity<UpdateTeamInfo> setTeam(@RequestBody UpdateTeamInfo teamInfoDto,
-                                     @PathVariable Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
+                                                  @PathVariable Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
         teamService.updateTeamInfo(teamInfoDto, teamId, userInfo.id());
         log.info("팀 설정 수정");
 

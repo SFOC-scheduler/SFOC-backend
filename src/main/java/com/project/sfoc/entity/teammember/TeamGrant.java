@@ -1,4 +1,4 @@
-package com.project.sfoc.teammember;
+package com.project.sfoc.entity.teammember;
 
 public enum TeamGrant {
 

@@ -1,9 +1,9 @@
-package com.project.sfoc.teammember;
+package com.project.sfoc.entity.teammember;
 
 import com.project.sfoc.security.jwt.UserInfo;
-import com.project.sfoc.teammember.dto.DeleteTeamMemberDto;
-import com.project.sfoc.teammember.dto.TeamMemberResponseDto;
-import com.project.sfoc.teammember.dto.UpdateTeamGrantDto;
+import com.project.sfoc.entity.teammember.dto.DeleteTeamMemberDto;
+import com.project.sfoc.entity.teammember.dto.TeamMemberResponseDto;
+import com.project.sfoc.entity.teammember.dto.UpdateTeamGrantDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
