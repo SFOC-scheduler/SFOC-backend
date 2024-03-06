@@ -3,6 +3,7 @@ package com.project.sfoc.team;
 import com.project.sfoc.team.dto.*;
 import com.project.sfoc.teammember.TeamGrant;
 import com.project.sfoc.security.jwt.UserInfo;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class TeamController {
     private final TeamService teamService;
 
     @PostMapping
-    public ResponseEntity<?> createTeam(@RequestBody TeamRequestDto teamRequestDto, Authentication authentication) {
+    public ResponseEntity<?> createTeam(@RequestBody @Valid TeamRequestDto teamRequestDto, Authentication authentication) {
 
         UserInfo userInfo = (UserInfo) authentication.getPrincipal();
         Long userId = userInfo.id();
@@ -30,7 +31,7 @@ public class TeamController {
     }
 
     @PostMapping("/{teamId}/entry")
-    public ResponseEntity<TeamMemberDto> setUserNickname(@RequestBody UserNicknameDto userNicknameDto,
+    public ResponseEntity<TeamMemberDto> setUserNickname(@RequestBody @Valid UserNicknameDto userNicknameDto,
                                                          @PathVariable Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
         TeamMemberDto teamMemberDto = teamService.entryTeam(TeamMemberDto.of(userInfo.id(), teamId, userNicknameDto.userNickname(), TeamGrant.NORMAL));
         return ResponseEntity.ok(teamMemberDto);
