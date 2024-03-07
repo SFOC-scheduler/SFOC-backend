@@ -3,11 +3,13 @@ package com.project.sfoc.entity.schedule;
 import com.project.sfoc.entity.teammember.TeamMember;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Schedule {
 
@@ -16,25 +18,21 @@ public class Schedule {
     @Column(name = "schedule_id")
     private Long id;
 
-    private String title;
-    private String memo;
-
-    @Enumerated(EnumType.STRING)
-    private PeriodType periodType;
-    private String period;
-
-    private Boolean isEnableDday;
-
-    private LocalDateTime startTime;
-
-    private LocalDateTime endTime;
-
     @ManyToOne
     @JoinColumn(name = "team_member_id")
     private TeamMember teamMember;
 
-    private Long periodCount;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Convert(converter = PeriodRepeatConverter.class)
+    private PeriodRepeat periodRepeat;
 
-    private LocalDateTime periodEndTime;
+    private Schedule(TeamMember teamMember, PeriodRepeat periodRepeat) {
+        this.teamMember = teamMember;
+        this.periodRepeat = periodRepeat;
+    }
+
+    public static Schedule of(TeamMember teamMember, PeriodRepeat periodRepeat) {
+        return new Schedule(teamMember, periodRepeat);
+    }
 
 }
