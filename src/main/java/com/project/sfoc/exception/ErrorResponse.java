@@ -15,6 +15,7 @@ public record ErrorResponse(
     }
 
     public static ResponseEntity<ErrorResponse> toResponseEntity (Error error) {
-        return new ResponseEntity<>(ErrorResponse.from(error), error.getHttpStatus());
+        return ResponseEntity.status(error.getHttpStatus())
+                .body(ErrorResponse.from(error));
     }
 }
