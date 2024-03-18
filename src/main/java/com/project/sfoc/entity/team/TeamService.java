@@ -30,13 +30,11 @@ public class TeamService {
     private final UserRepository userRepository;
     private final TeamMemberRepository teamMemberRepository;
 
-
     public List<ResponseTeamInfoDto> getTeams(Long userId) {
 
         List<Team> teams = teamRepository.findTeams(userId);
         return teams.stream().map(ResponseTeamInfoDto::from).toList();
     }
-
 
     // 팀 이름 중복은 최상위 계층의 이메일로 확인
     public void createTeam(TeamRequestDto teamRequestDto, Long userId) {
@@ -45,7 +43,6 @@ public class TeamService {
 
         entryTeam(TeamMemberDto.of(userId, savedteam.getId(), teamRequestDto.userNickname(), HIGHEST_ADMIN));
     }
-
 
     public TeamMemberDto entryTeam(TeamMemberDto teamMemberDto) {
 
