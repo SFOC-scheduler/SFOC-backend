@@ -2,7 +2,7 @@ package com.project.sfoc.entity.team.dto;
 
 import com.project.sfoc.entity.team.Disclosure;
 
-public record UpdateTeamInfo(
+public record RequestUpdateTeamInfo(
 
     String teamName,
     String description,

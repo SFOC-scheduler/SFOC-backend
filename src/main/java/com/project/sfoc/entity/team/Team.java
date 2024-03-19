@@ -1,9 +1,13 @@
 package com.project.sfoc.entity.team;
 
+import com.project.sfoc.entity.teammember.TeamMember;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -24,6 +28,9 @@ public class Team {
 
     @Enumerated(value = EnumType.STRING)
     private Disclosure disclosure;
+
+    @OneToMany(mappedBy = "team")
+    private List<TeamMember> teamMembers = new ArrayList<>();
 
     private Team(String name, String invitationCode, String description, Disclosure disclosure) {
         this.name = name;

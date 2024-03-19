@@ -8,23 +8,28 @@ import com.project.sfoc.entity.team.Disclosure;
 import com.project.sfoc.entity.team.Team;
 import com.project.sfoc.entity.team.TeamRepository;
 import com.project.sfoc.entity.team.TeamService;
+import com.project.sfoc.entity.team.dto.*;
+import com.project.sfoc.entity.teammember.dto.ResponseTeamInfoDto;
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.entity.user.UserRepository;
-import com.project.sfoc.entity.team.dto.AbstractTeamInfoDto;
-import com.project.sfoc.entity.team.dto.TeamMemberDto;
-import com.project.sfoc.entity.team.dto.TeamRequestDto;
-import com.project.sfoc.entity.team.dto.UpdateTeamInfo;
 import com.project.sfoc.entity.teammember.TeamMember;
 import com.project.sfoc.entity.teammember.TeamMemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static com.project.sfoc.entity.teammember.TeamGrant.HIGHEST_ADMIN;
@@ -51,6 +56,8 @@ class TeamServiceTest {
     private Team team;
     private User user;
 
+    private List<Team> teams = new ArrayList<>();
+
     private ArbitraryBuilder<User> userArbitraryBuilder;
     private ArbitraryBuilder<Team> teamArbitraryBuilder;
 
@@ -68,6 +75,17 @@ class TeamServiceTest {
         user = userArbitraryBuilder.sample();
         team = teamArbitraryBuilder.sample();
 
+        Team team1 = Team.of("team1", "1234", "팀에 대한 설명입니다1.", Disclosure.PUBLIC);
+        Team team2 = Team.of("team12", "12345", "팀에 대한 설명입니다2.", Disclosure.PUBLIC);
+        Team team3 = Team.of("team123", "123456", "팀에 대한 설명입니다3.", Disclosure.PUBLIC);
+        Team team4 = Team.of("team1234", "1234567", "팀에 대한 설명입니다4.", Disclosure.PUBLIC);
+        Team team5 = Team.of("team12345", "12345678", "팀에 대한 설명입니다5.", Disclosure.PUBLIC);
+
+        teams.add(team1);
+        teams.add(team2);
+        teams.add(team3);
+        teams.add(team4);
+        teams.add(team5);
     }
 
 
@@ -148,6 +166,7 @@ class TeamServiceTest {
         assertThat(returnDto).isNotNull();
         assertThat(returnDto.userNickname()).isEqualTo("abc");
         assertThat(returnDto.teamGrant()).isEqualTo(NORMAL);
+
         then(userRepository).should(times(1)).findById(any());
         then(teamRepository).should(times(1)).findById(1L);
         then(teamMemberRepository).should(times(1)).existsByTeam_IdAndUser_Id(1L, 1L);
@@ -161,7 +180,6 @@ class TeamServiceTest {
     public void teamService_EntryTeam_Return_Exception() {
         //Given
         TeamMemberDto teamMemberDto = TeamMemberDto.of(1L, 1L, "abc", NORMAL);
-        TeamMember teamMember = TeamMember.of("팀 닉네임", "유저 닉네임", NORMAL, user, team);
         ReflectionTestUtils.setField(team, "id", 1L);
         ReflectionTestUtils.setField(user, "id", 1L);
 
@@ -169,7 +187,6 @@ class TeamServiceTest {
         given(userRepository.findById(any(Long.class))).willReturn(Optional.of(user));
         given(teamRepository.findById(any(Long.class))).willReturn(Optional.of(team));
         given(teamMemberRepository.existsByUserNicknameAndTeam_Id(any(String.class), any(Long.class))).willReturn(true);
-//        given(teamMemberRepository.save(any(TeamMember.class))).willReturn(teamMember);
 
         //When
         assertThatThrownBy(() -> teamService.entryTeam(teamMemberDto)).isInstanceOf(IllegalArgumentException.class);
@@ -194,6 +211,7 @@ class TeamServiceTest {
         assertThat(teamInfo).isNotNull();
         assertThat(teamInfo.getTeamName()).isNull();
         assertThat(teamInfo.getTeamNickname()).isEqualTo(teamMember.getTeamNickname());
+
         then(teamRepository).should(times(1)).findById(any());
         then(teamMemberRepository).should(times(1)).findByTeam_IdAndUser_Id(any(), any());
 
@@ -215,6 +233,7 @@ class TeamServiceTest {
         assertThat(teamInfo).isNotNull();
         assertThat(teamInfo.getTeamName()).isNull();
         assertThat(teamInfo.getTeamNickname()).isEqualTo(teamMember.getTeamNickname());
+
         then(teamRepository).should(times(1)).findById(any());
         then(teamMemberRepository).should(times(1)).findByTeam_IdAndUser_Id(any(), any());
 
@@ -238,18 +257,19 @@ class TeamServiceTest {
         assertThat(teamInfo.getTeamName()).isNotNull();
         assertThat(teamInfo.getTeamName()).isEqualTo(team.getName());
         assertThat(teamInfo.getTeamNickname()).isEqualTo(teamMember.getTeamNickname());
+
         then(teamRepository).should(times(1)).findById(any());
         then(teamMemberRepository).should(times(1)).findByTeam_IdAndUser_Id((any()), any());
 
     }
 
 
-    @Test
     @DisplayName("관리자가 팀 정보 업데이트 테스트")
+    @RepeatedTest(value = 5)
     public void teamService_UpdateTeamMemberAndTeam_Return_Void() {
         //Given
 
-        UpdateTeamInfo updateTeamInfo = new UpdateTeamInfo("team update", "팀이 변경되었습니다.",
+        RequestUpdateTeamInfo requestUpdateTeamInfo = new RequestUpdateTeamInfo("team update", "팀이 변경되었습니다.",
                 Disclosure.APPROVAL, "팀 변경 닉네임", "유저 변경 닉네임");
 
         TeamMember teamMember = TeamMember.of("팀 닉네임", "유저 닉네임", HIGHEST_ADMIN, user, team);
@@ -258,44 +278,92 @@ class TeamServiceTest {
         given(teamRepository.findById(any(Long.class))).willReturn(Optional.of(team));
 
         //When
-        teamService.updateTeamInfo(updateTeamInfo, 1L, 1L);
+        teamService.updateTeamInfo(requestUpdateTeamInfo, 1L, 1L);
 
         //Then
-        assertThat(team.getDescription()).isEqualTo(updateTeamInfo.description());
-        assertThat(team.getName()).isEqualTo(updateTeamInfo.teamName());
-        assertThat(team.getDisclosure()).isEqualTo(updateTeamInfo.disclosure());
-        assertThat(teamMember.getTeamNickname()).isEqualTo(updateTeamInfo.teamNickname());
-        assertThat(teamMember.getUserNickname()).isEqualTo(updateTeamInfo.userNickname());
+        assertThat(team.getDescription()).isEqualTo(requestUpdateTeamInfo.description());
+        assertThat(team.getName()).isEqualTo(requestUpdateTeamInfo.teamName());
+        assertThat(team.getDisclosure()).isEqualTo(requestUpdateTeamInfo.disclosure());
+        assertThat(teamMember.getTeamNickname()).isEqualTo(requestUpdateTeamInfo.teamNickname());
+        assertThat(teamMember.getUserNickname()).isEqualTo(requestUpdateTeamInfo.userNickname());
+
         then(teamMemberRepository).should(times(1)).findByTeam_IdAndUser_Id(any(), any());
         then(teamRepository).should(times(1)).findById(any());
 
     }
 
     // TODO: fixturemonkey 랜덤 값 반환 생각해서 테스트 짜기
-    @Test
     @DisplayName("일반 구성원이 팀 정보 업데이트 테스트")
+    @RepeatedTest(value = 5)
     public void teamService_UpdateTeamMember_Return_Void() {
         //Given
 
         team = Team.of("team1", "1234", "팀에 대한 설명입니다.", Disclosure.PUBLIC);
         user = User.of(Provider.GOOGLE, "abcd@gmail.com", "12345678901234567890");
 
-        UpdateTeamInfo updateTeamInfo = new UpdateTeamInfo("team update", "팀이 변경되었습니다.",
+        RequestUpdateTeamInfo requestUpdateTeamInfo = new RequestUpdateTeamInfo("team update", "팀이 변경되었습니다.",
                 Disclosure.APPROVAL, "팀 변경 닉네임", "유저 변경 닉네임");
         TeamMember teamMember = TeamMember.of("팀 닉네임", "유저 닉네임", NORMAL, user, team);
 
         given(teamMemberRepository.findByTeam_IdAndUser_Id(any(Long.class), any(Long.class))).willReturn(Optional.of(teamMember));
 
         //When
-        teamService.updateTeamInfo(updateTeamInfo, 1L, 1L);
+        teamService.updateTeamInfo(requestUpdateTeamInfo, 1L, 1L);
 
         //Then
-        assertThat(team.getDescription()).isNotEqualTo(updateTeamInfo.description());
-        assertThat(team.getName()).isNotEqualTo(updateTeamInfo.teamName());
-        assertThat(team.getDisclosure()).isNotEqualTo(updateTeamInfo.disclosure());
-        assertThat(teamMember.getTeamNickname()).isEqualTo(updateTeamInfo.teamNickname());
-        assertThat(teamMember.getUserNickname()).isEqualTo(updateTeamInfo.userNickname());
+        assertThat(team.getDescription()).isNotEqualTo(requestUpdateTeamInfo.description());
+        assertThat(team.getName()).isNotEqualTo(requestUpdateTeamInfo.teamName());
+        assertThat(team.getDisclosure()).isNotEqualTo(requestUpdateTeamInfo.disclosure());
+        assertThat(teamMember.getTeamNickname()).isEqualTo(requestUpdateTeamInfo.teamNickname());
+        assertThat(teamMember.getUserNickname()).isEqualTo(requestUpdateTeamInfo.userNickname());
+
         then(teamMemberRepository).should(times(1)).findByTeam_IdAndUser_Id(any(), any());
+
+    }
+
+    @Test
+    @DisplayName("팀 이름 일정 검색 시 검색 성공")
+    public void teamService_teamSearch_Return_List_SearchResponseDto() {
+        //Given
+        RequestTeamSearchDto requestTeamSearchDto = RequestTeamSearchDto.of("team");
+        ResponseTeamSearchInfoDto responseTeamSearchInfoDto1 = new ResponseTeamSearchInfoDto(1L, "team1", "this is team1", "abcd@google.com");
+        ResponseTeamSearchInfoDto responseTeamSearchInfoDto2 = new ResponseTeamSearchInfoDto(2L, "team2", "this is team2", "abcd@google.com");
+        List<ResponseTeamSearchInfoDto> response = new ArrayList<>();
+        response.add(responseTeamSearchInfoDto1);
+        response.add(responseTeamSearchInfoDto2);
+        Pageable page = PageRequest.of(0, 10);
+        Page<ResponseTeamSearchInfoDto> responseTeamSearchInfoDto = new PageImpl<>(response, page, response.size());
+
+        given(teamRepository.findSearchResult(any(), any())).willReturn(responseTeamSearchInfoDto);
+
+        //When
+        Page<ResponseTeamSearchInfoDto> teamList = teamService.searchTeam(requestTeamSearchDto, page);
+
+        //Then
+        assertThat(teamList).isNotNull();
+        assertThat(teamList.getTotalElements()).isEqualTo(2);
+
+
+        then(teamRepository).should(times(1)).
+                findSearchResult(requestTeamSearchDto.teamSearch(), page);
+
+    }
+
+    @Test
+    @DisplayName("사용자의 소속된 팀 정보 가져오기 성공")
+    public void teamService_getTeams_Return_List_ResponseTeamInfoDto() {
+        //Given
+        given(teamRepository.findTeams(any())).willReturn(teams);
+        List<ResponseTeamInfoDto> response = teams.stream().map(ResponseTeamInfoDto::from).toList();
+        //When
+        List<ResponseTeamInfoDto> teams = teamService.getTeams(1L);
+
+        //Then
+        assertThat(teams).isNotNull();
+        assertThat(teams).isEqualTo(response);
+
+        then(teamRepository).should(times(1)).findTeams(1L);
+
 
     }
 
