@@ -16,9 +16,6 @@ public class SubSchedule {
     @Column(name = "sub_schedule_id")
     private Long id;
 
-    private String title;
-    private String memo;
-
     private Boolean isEnableDday;
     private Boolean isSuccess;
 
@@ -29,10 +26,8 @@ public class SubSchedule {
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;
 
-    private SubSchedule(String title, String memo, Boolean isEnableDday, Boolean isSuccess,
+    private SubSchedule(Boolean isEnableDday, Boolean isSuccess,
                         LocalDateTime startDateTime, LocalDateTime endDateTime, Schedule schedule) {
-        this.title = title;
-        this.memo = memo;
         this.isEnableDday = isEnableDday;
         this.isSuccess = isSuccess;
         this.startDateTime = startDateTime;
@@ -40,9 +35,9 @@ public class SubSchedule {
         this.schedule = schedule;
     }
 
-    public static SubSchedule of(String title, String memo, Boolean isEnableDday, Boolean isSuccess,
+    public static SubSchedule of(Boolean isEnableDday, Boolean isSuccess,
                       LocalDateTime startDateTime, LocalDateTime endDateTime, Schedule schedule) {
-        return new SubSchedule(title, memo, isEnableDday, isSuccess, startDateTime, endDateTime, schedule);
+        return new SubSchedule(isEnableDday, isSuccess, startDateTime, endDateTime, schedule);
     }
 
 }
