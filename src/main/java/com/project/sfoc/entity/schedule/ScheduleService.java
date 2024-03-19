@@ -1,7 +1,6 @@
 package com.project.sfoc.entity.schedule;
 
 import com.project.sfoc.entity.schedule.dto.CreateScheduleDto;
-import com.project.sfoc.entity.schedule.dto.ScheduleInformDto;
 import com.project.sfoc.entity.teammember.TeamMember;
 import com.project.sfoc.entity.teammember.TeamMemberRepository;
 import com.project.sfoc.exception.EntityNotFoundException;
@@ -38,13 +37,6 @@ public class ScheduleService {
 
         scheduleRepository.save(schedule);
         subScheduleRepository.saveAll(subSchedules);
-    }
-
-    public ScheduleInformDto getScheduleInform(Long userId, Long subScheduleId) {
-        Schedule schedule = getScheduleBySubScheduleId(subScheduleId);
-        SubSchedule subSchedule = getSubScheduleByIdAndUserId(subScheduleId, userId);
-        long count = subScheduleRepository.countBySchedule_Id(schedule.getId());
-        return ScheduleInformDto.from(schedule, subSchedule, count == 1L);
     }
 
 }

@@ -1,7 +1,6 @@
 package com.project.sfoc.entity.schedule;
 
 import com.project.sfoc.entity.schedule.dto.CreateScheduleDto;
-import com.project.sfoc.entity.schedule.dto.ScheduleInformDto;
 import com.project.sfoc.security.jwt.UserInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +21,6 @@ public class ScheduleController {
                                               @RequestBody @Valid CreateScheduleDto dto) {
         scheduleService.createSchedule(userInfo.id(), teamId, dto);
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/schedules/{subScheduleId}")
-    public ResponseEntity<ScheduleInformDto> getScheduleInform(@AuthenticationPrincipal UserInfo userInfo,
-                                                               @PathVariable Long subScheduleId) {
-        ScheduleInformDto dto = scheduleService.getScheduleInform(userInfo.id(), subScheduleId);
-        return ResponseEntity.ok().body(dto);
     }
 
 }
