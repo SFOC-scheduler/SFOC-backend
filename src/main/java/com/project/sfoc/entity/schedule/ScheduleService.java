@@ -2,32 +2,42 @@ package com.project.sfoc.entity.schedule;
 
 import com.project.sfoc.entity.schedule.dto.CreateScheduleDto;
 import com.project.sfoc.entity.schedule.dto.ScheduleInformDto;
-import com.project.sfoc.entity.user.UserRepository;
+import com.project.sfoc.entity.teammember.TeamMember;
+import com.project.sfoc.entity.teammember.TeamMemberRepository;
+import com.project.sfoc.exception.EntityNotFoundException;
+import com.project.sfoc.exception.Error;
+import com.project.sfoc.exception.IllegalDtoException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
+import java.util.List;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
     private final SubScheduleRepository subScheduleRepository;
-    private final UserRepository userRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
-    private Schedule getScheduleBySubScheduleId(Long subScheduleId) {
-        return scheduleRepository.findBySubscheduleId(subScheduleId)
-                .orElseThrow(() -> new IllegalArgumentException("일치하는 entity 없음"));
-    }
+    public void createSchedule(Long userId, Long teamId, CreateScheduleDto dto) {
+        log.info("dto={}", dto);
 
-    private SubSchedule getSubScheduleByIdAndUserId(Long subScheduleId, Long userId) {
-        return subScheduleRepository.findByIdAndUserId(subScheduleId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("일치하는 entity 없음"));
-    }
+        if (Duration.between(dto.startDateTime(), dto.endDateTime()).toSeconds() > dto.periodType().secondsByType(dto.interval()))
+            throw new IllegalDtoException("일정 반복 주기는 일정보다 길게 설정해야 합니다.", Error.INVALID_DTO);
 
-    public void createSchedule(Long userId, CreateScheduleDto dto) {
+        TeamMember teamMember = teamMemberRepository.findByTeam_IdAndUser_Id(teamId, userId)
+                .orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
+        Schedule schedule = dto.toSchedule(teamMember);
+        List<SubSchedule> subSchedules = dto.toSubSchedules(schedule);
 
+        scheduleRepository.save(schedule);
+        subScheduleRepository.saveAll(subSchedules);
     }
 
     public ScheduleInformDto getScheduleInform(Long userId, Long subScheduleId) {
