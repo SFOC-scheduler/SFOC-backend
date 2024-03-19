@@ -1,5 +1,8 @@
 package com.project.sfoc.exception;
 
+import lombok.Getter;
+
+@Getter
 public class BusinessException extends RuntimeException {
 
     Error error;
