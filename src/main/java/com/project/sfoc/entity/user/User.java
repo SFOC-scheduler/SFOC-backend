@@ -1,6 +1,5 @@
 package com.project.sfoc.entity.user;
 
-import com.project.sfoc.entity.Provider;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
