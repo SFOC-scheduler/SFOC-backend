@@ -5,7 +5,7 @@ import com.project.sfoc.entity.team.Team;
 import com.project.sfoc.global.vaild.ValidEnum;
 import jakarta.validation.constraints.NotNull;
 
-public record TeamRequestDto(
+public record RequestTeamDto(
     @NotNull(message = "팀 이름을 입력해주세요")
     String name,
     @NotNull(message = "팀 설명을 적어주세요")
