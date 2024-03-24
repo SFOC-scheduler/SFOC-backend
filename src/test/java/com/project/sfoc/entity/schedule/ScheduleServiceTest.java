@@ -175,7 +175,7 @@ class ScheduleServiceTest {
         assertThatThrownBy(() -> scheduleService.getTeamSchedules(team.getId(), user.getId()))
                 .isInstanceOf(EntityNotFoundException.class)
                 .extracting("error")
-                .isEqualTo(INVALID_DTO);
+                .isEqualTo(DENIED_ACCESS);
     }
 
     @Test
