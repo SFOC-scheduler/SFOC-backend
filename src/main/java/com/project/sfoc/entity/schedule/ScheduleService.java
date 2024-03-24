@@ -1,6 +1,7 @@
 package com.project.sfoc.entity.schedule;
 
 import com.project.sfoc.entity.schedule.dto.CreateScheduleDto;
+import com.project.sfoc.entity.schedule.dto.ScheduleInformDto;
 import com.project.sfoc.entity.teammember.TeamMember;
 import com.project.sfoc.entity.teammember.TeamMemberRepository;
 import com.project.sfoc.exception.EntityNotFoundException;
@@ -39,4 +40,20 @@ public class ScheduleService {
         subScheduleRepository.saveAll(subSchedules);
     }
 
+    public List<ScheduleInformDto> getTeamSchedules(Long teamId, Long userId) {
+        TeamMember teamMember = teamMemberRepository.findByTeam_IdAndUser_Id(teamId, userId)
+                .orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
+
+        return scheduleRepository.findAllByTeamMember_Id(teamMember.getId()).stream()
+                .map(schedule -> ScheduleInformDto.from(
+                        schedule, subScheduleRepository.findAllBySchedule_Id(schedule.getId())))
+                .toList();
+    }
+
+    public List<ScheduleInformDto> getAllSchedules(Long userId) {
+        return scheduleRepository.findAllByUser_Id(userId).stream()
+                .map(schedule -> ScheduleInformDto.from(
+                        schedule, subScheduleRepository.findAllBySchedule_Id(schedule.getId())))
+                .toList();
+    }
 }

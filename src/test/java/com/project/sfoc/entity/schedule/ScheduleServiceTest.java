@@ -1,6 +1,7 @@
 package com.project.sfoc.entity.schedule;
 
 import com.project.sfoc.entity.schedule.dto.CreateScheduleDto;
+import com.project.sfoc.entity.schedule.dto.ScheduleInformDto;
 import com.project.sfoc.entity.team.Disclosure;
 import com.project.sfoc.entity.team.Team;
 import com.project.sfoc.entity.teammember.TeamGrant;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import static com.project.sfoc.exception.Error.*;
 import static org.assertj.core.api.Assertions.*;
@@ -56,6 +58,25 @@ class ScheduleServiceTest {
         TeamMember teamMember = TeamMember.of("팀 닉네임", "닉네임", TeamGrant.NORMAL, user, team);
         ReflectionTestUtils.setField(teamMember, "id", 3L);
         return teamMember;
+    }
+
+    private Schedule getSchedule(TeamMember teamMember) {
+        Schedule schedule = Schedule.of("제목", "설명", teamMember,
+                PeriodRepeat.of(
+                        PeriodType.DAY, 1L, List.of(LocalDate.now()),
+                        RepeatType.COUNT, 5, null));
+        ReflectionTestUtils.setField(schedule, "id", 4L);
+        return schedule;
+    }
+
+    private List<SubSchedule> getSubSchedules(Schedule schedule) {
+        return IntStream.range(0, schedule.getPeriodRepeat().repeatCount())
+                .mapToObj(count -> SubSchedule.of(
+                        Boolean.FALSE, Boolean.FALSE,
+                        LocalDateTime.now().plusDays(count),
+                        LocalDateTime.now().plusDays(count).plusHours(schedule.getPeriodRepeat().interval()),
+                        schedule))
+                .toList();
     }
 
     private CreateScheduleDto getCreateScheduleDto(LocalDateTime startDateTime, LocalDateTime endDateTime, Boolean isEnableDday,
@@ -140,5 +161,67 @@ class ScheduleServiceTest {
         then(subScheduleRepository).should().saveAll(anyList());
     }
 
-    
+    @Test
+    @DisplayName("팀 일정 전체 조회 실패")
+    void getTeamSchedulesTestFailure() {
+        // given
+        Team team = getTeam();
+        User user = getUser();
+        given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId()))
+                .willReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> scheduleService.getTeamSchedules(team.getId(), user.getId()))
+                .isInstanceOf(EntityNotFoundException.class)
+                .extracting("error")
+                .isEqualTo(INVALID_DTO);
+    }
+
+    @Test
+    @DisplayName("팀 일정 전체 조회 성공")
+    void getTeamSchedulesTestSuccess() {
+        // given
+        User user = getUser();
+        Team team = getTeam();
+        TeamMember teamMember = getTeamMember(user, team);
+        Schedule schedule = getSchedule(teamMember);
+        List<SubSchedule> subSchedules = getSubSchedules(schedule);
+        given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId()))
+                .willReturn(Optional.of(teamMember));
+        given(scheduleRepository.findAllByTeamMember_Id(teamMember.getId()))
+                .willReturn(List.of(schedule));
+        given(subScheduleRepository.findAllBySchedule_Id(schedule.getId()))
+                .willReturn(subSchedules);
+
+        // when
+        List<ScheduleInformDto> teamSchedules = scheduleService.getTeamSchedules(team.getId(), user.getId());
+
+        // then
+        assertThat(teamSchedules.size()).isEqualTo(1L);
+        assertThat(teamSchedules.get(0).subScheduleInforms().size()).isEqualTo(subSchedules.size());
+    }
+
+    @Test
+    @DisplayName("일정 전체 조회")
+    void getAllSchedules() {
+        // given
+        User user = getUser();
+        Team team = getTeam();
+        TeamMember teamMember = getTeamMember(user, team);
+        Schedule schedule = getSchedule(teamMember);
+        List<SubSchedule> subSchedules = getSubSchedules(schedule);
+        given(scheduleRepository.findAllByUser_Id(user.getId()))
+                .willReturn(List.of(schedule));
+        given(subScheduleRepository.findAllBySchedule_Id(schedule.getId()))
+                .willReturn(subSchedules);
+
+        // when
+        List<ScheduleInformDto> allSchedules = scheduleService.getAllSchedules(user.getId());
+
+        // then
+        assertThat(allSchedules.size()).isEqualTo(1L);
+        assertThat(allSchedules.get(0).subScheduleInforms().size()).isEqualTo(subSchedules.size());
+    }
+
 }
