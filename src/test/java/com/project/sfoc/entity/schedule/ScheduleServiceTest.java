@@ -167,8 +167,8 @@ class ScheduleServiceTest {
         // given
         Team team = getTeam();
         User user = getUser();
-        given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId()))
-                .willReturn(Optional.empty());
+        given(teamMemberRepository.existsByTeam_IdAndUser_Id(team.getId(), user.getId()))
+                .willReturn(false);
 
         // when
         // then
@@ -187,9 +187,9 @@ class ScheduleServiceTest {
         TeamMember teamMember = getTeamMember(user, team);
         Schedule schedule = getSchedule(teamMember);
         List<SubSchedule> subSchedules = getSubSchedules(schedule);
-        given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId()))
-                .willReturn(Optional.of(teamMember));
-        given(scheduleRepository.findAllByTeamMember_Id(teamMember.getId()))
+        given(teamMemberRepository.existsByTeam_IdAndUser_Id(team.getId(), user.getId()))
+                .willReturn(true);
+        given(scheduleRepository.findAllByTeamMember_Team_Id(team.getId()))
                 .willReturn(List.of(schedule));
         given(subScheduleRepository.findAllBySchedule_Id(schedule.getId()))
                 .willReturn(subSchedules);
@@ -211,7 +211,7 @@ class ScheduleServiceTest {
         TeamMember teamMember = getTeamMember(user, team);
         Schedule schedule = getSchedule(teamMember);
         List<SubSchedule> subSchedules = getSubSchedules(schedule);
-        given(scheduleRepository.findAllByUser_Id(user.getId()))
+        given(scheduleRepository.findAllByTeamMember_User_Id(user.getId()))
                 .willReturn(List.of(schedule));
         given(subScheduleRepository.findAllBySchedule_Id(schedule.getId()))
                 .willReturn(subSchedules);

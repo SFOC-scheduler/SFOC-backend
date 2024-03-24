@@ -40,18 +40,19 @@ public class ScheduleService {
         subScheduleRepository.saveAll(subSchedules);
     }
 
+    // TODO - Schedule 개수만큼 N+1 문제 발생
     public List<ScheduleInformDto> getTeamSchedules(Long teamId, Long userId) {
-        TeamMember teamMember = teamMemberRepository.findByTeam_IdAndUser_Id(teamId, userId)
-                .orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
+        if (!teamMemberRepository.existsByTeam_IdAndUser_Id(teamId, userId))
+            throw new EntityNotFoundException(Error.DENIED_ACCESS);
 
-        return scheduleRepository.findAllByTeamMember_Id(teamMember.getId()).stream()
+        return scheduleRepository.findAllByTeamMember_Team_Id(teamId).stream()
                 .map(schedule -> ScheduleInformDto.from(
                         schedule, subScheduleRepository.findAllBySchedule_Id(schedule.getId())))
                 .toList();
     }
 
     public List<ScheduleInformDto> getAllSchedules(Long userId) {
-        return scheduleRepository.findAllByUser_Id(userId).stream()
+        return scheduleRepository.findAllByTeamMember_User_Id(userId).stream()
                 .map(schedule -> ScheduleInformDto.from(
                         schedule, subScheduleRepository.findAllBySchedule_Id(schedule.getId())))
                 .toList();

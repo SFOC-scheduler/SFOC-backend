@@ -7,13 +7,6 @@ import java.util.List;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
-    List<Schedule> findAllByTeamMember_Id(Long teamMemberId);
-
-    @Query(value = """
-        select s
-        from Schedule s
-        join s.teamMember.user u
-        where u.id = :userId
-    """)
-    List<Schedule> findAllByUser_Id(Long userId);
+    List<Schedule> findAllByTeamMember_Team_Id(Long teamId);
+    List<Schedule> findAllByTeamMember_User_Id(Long userId);
 }
