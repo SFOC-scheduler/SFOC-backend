@@ -9,13 +9,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/teams/{teamId}/schedules")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
 
-    @PostMapping
+    @PostMapping("/teams/{teamId}/schedules")
     public ResponseEntity<Void> creatSchedule(@AuthenticationPrincipal UserInfo userInfo,
                                               @PathVariable Long teamId,
                                               @RequestBody @Valid CreateScheduleDto dto) {

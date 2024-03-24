@@ -27,7 +27,7 @@ public class ScheduleService {
     public void createSchedule(Long userId, Long teamId, CreateScheduleDto dto) {
         log.info("dto={}", dto);
 
-        if (Duration.between(dto.startDateTime(), dto.endDateTime()).toSeconds() > dto.periodType().secondsByType(dto.interval()))
+        if (Duration.between(dto.startDateTime(), dto.endDateTime()).toSeconds() >= dto.periodType().secondsByType(dto.interval()))
             throw new IllegalDtoException("일정 반복 주기는 일정보다 길게 설정해야 합니다.", Error.INVALID_DTO);
 
         TeamMember teamMember = teamMemberRepository.findByTeam_IdAndUser_Id(teamId, userId)

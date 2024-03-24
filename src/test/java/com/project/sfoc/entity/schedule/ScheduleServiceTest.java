@@ -9,7 +9,7 @@ import com.project.sfoc.entity.teammember.TeamMemberRepository;
 import com.project.sfoc.entity.user.Provider;
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.exception.EntityNotFoundException;
-import com.project.sfoc.exception.Error;
+import com.project.sfoc.exception.IllegalDtoException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +23,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.project.sfoc.exception.Error.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,20 +52,20 @@ class ScheduleServiceTest {
         return team;
     }
 
-    private TeamMember getTeamMember() {
-        TeamMember teamMember = TeamMember.of("팀 닉네임", "닉네임", TeamGrant.NORMAL, getUser(), getTeam());
+    private TeamMember getTeamMember(User user, Team team) {
+        TeamMember teamMember = TeamMember.of("팀 닉네임", "닉네임", TeamGrant.NORMAL, user, team);
         ReflectionTestUtils.setField(teamMember, "id", 3L);
         return teamMember;
     }
 
-    private CreateScheduleDto getCreateScheduleDto(Boolean isEnableDday,
+    private CreateScheduleDto getCreateScheduleDto(LocalDateTime startDateTime, LocalDateTime endDateTime, Boolean isEnableDday,
                                                    PeriodType periodType, Long interval, List<LocalDate> periodDate,
                                                    RepeatType repeatType, Integer repeatCount, LocalDate repeatEndDate) {
         return new CreateScheduleDto(
                 "제목",
                 "설명",
-                LocalDateTime.now(),
-                LocalDateTime.now().plusHours(2L),
+                startDateTime,
+                endDateTime,
                 isEnableDday,
                 periodType,
                 interval,
@@ -77,36 +78,57 @@ class ScheduleServiceTest {
 
     @Test
     @DisplayName("일정 생성 실패 - 멤버와 유저가 다름")
-    void createScheduleFailure() {
+    void createScheduleFailureWithDifferentTeamMemberAndUser() {
         // given
-        TeamMember teamMember = getTeamMember();
-        Team team = getTeam();
         User user = getUser();
+        Team team = getTeam();
         given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId()))
                 .willReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> scheduleService.createSchedule(
-                        user.getId(), team.getId(), getCreateScheduleDto(
-                                Boolean.FALSE, PeriodType.DAY, 2L,
-                                List.of(LocalDate.now()), RepeatType.COUNT, 5, null)));
-
         // then
-        assertEquals(exception.getError(), Error.INVALID_DTO);
+        assertThatThrownBy(() -> scheduleService.createSchedule(
+                        user.getId(), team.getId(), getCreateScheduleDto(
+                                LocalDateTime.now(), LocalDateTime.now().plusHours(2L),
+                                Boolean.FALSE, PeriodType.DAY, 2L,
+                                List.of(LocalDate.now()), RepeatType.COUNT, 5, null)))
+                .isInstanceOf(EntityNotFoundException.class)
+                .extracting("error")
+                .isEqualTo(INVALID_DTO);
+    }
+    @Test
+    @DisplayName("일정 생성 실패 - 반복 주기가 일정보다 길지 않음")
+    void createScheduleFailureWithNotLongerIntervalThanSchedule() {
+        // given
+
+        User user = getUser();
+        Team team = getTeam();
+
+        // when
+        // then
+        assertThatThrownBy(() -> scheduleService.createSchedule(
+                        user.getId(), team.getId(), getCreateScheduleDto(
+                        LocalDateTime.now(), LocalDateTime.now().plusDays(2L),
+                        Boolean.FALSE, PeriodType.DAY, 2L,
+                                List.of(LocalDate.now()), RepeatType.COUNT, 5, null)))
+                .isInstanceOf(IllegalDtoException.class)
+                .hasMessageStartingWith("일정 반복 주기는")
+                .extracting("error")
+                .isEqualTo(INVALID_DTO);
     }
 
     @Test
     @DisplayName("일정 생성 성공")
     void createScheduleSuccess() {
         // given
-        TeamMember teamMember = getTeamMember();
-        Team team = getTeam();
         User user = getUser();
+        Team team = getTeam();
+        TeamMember teamMember = getTeamMember(user, team);
         given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId()))
                 .willReturn(Optional.of(teamMember));
 
         CreateScheduleDto dto = getCreateScheduleDto(
+                LocalDateTime.now(), LocalDateTime.now().plusHours(2L),
                 Boolean.FALSE, PeriodType.DAY, 2L,
                 List.of(LocalDate.now()), RepeatType.COUNT, 5, null);
 
