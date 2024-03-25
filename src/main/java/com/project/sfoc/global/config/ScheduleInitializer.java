@@ -51,6 +51,12 @@ public class ScheduleInitializer implements ApplicationRunner {
         Schedule schedule2 = Schedule.of("제목", "설명", teamMember1,
                 PeriodRepeat.of(PeriodType.DAY, 3L, List.of(now.toLocalDate()),
                         RepeatType.COUNT, 2, null));
+        Schedule schedule3 = Schedule.of("제목", "설명", teamMember,
+                PeriodRepeat.of(PeriodType.DAY, 2L, List.of(now.toLocalDate()),
+                        RepeatType.COUNT, 3, null));
+        Schedule schedule4 = Schedule.of("제목", "설명", teamMember2,
+                PeriodRepeat.of(PeriodType.DAY, 2L, List.of(now.toLocalDate()),
+                        RepeatType.COUNT, 3, null));
 
         List<SubSchedule> subSchedules = new ArrayList<>();
         subSchedules.addAll(IntStream.range(0, 3)
@@ -61,11 +67,20 @@ public class ScheduleInitializer implements ApplicationRunner {
                 .mapToObj(count -> SubSchedule.of(Boolean.FALSE, Boolean.FALSE,
                         now.plusDays(count * 3L), now.plusDays(count * 3L).plusHours(1L), schedule2))
                 .toList());
+        subSchedules.addAll(IntStream.range(0, 3)
+                .mapToObj(count -> SubSchedule.of(Boolean.FALSE, Boolean.FALSE,
+                        now.plusDays(count * 2L), now.plusDays(count * 2L).plusHours(1L), schedule3))
+                .toList());
+        subSchedules.addAll(IntStream.range(0, 3)
+                .mapToObj(count -> SubSchedule.of(Boolean.FALSE, Boolean.FALSE,
+                        now.plusDays(count * 2L), now.plusDays(count * 2L).plusHours(1L), schedule4))
+                .toList());
+
 
         userRepository.saveAll(List.of(user, user1, user2));
         teamRepository.saveAll(List.of(team, team1));
         teamMemberRepository.saveAll(List.of(teamMember, teamMember1, teamMember2));
-        scheduleRepository.saveAll(List.of(schedule1, schedule2));
+        scheduleRepository.saveAll(List.of(schedule1, schedule2, schedule3, schedule4));
         subScheduleRepository.saveAll(subSchedules);
     }
 
