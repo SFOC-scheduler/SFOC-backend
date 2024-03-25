@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/schedules")
 @RequiredArgsConstructor
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
 
-    @PostMapping("/teams/{teamId}/schedules")
+    @PostMapping("/teams/{teamId}")
     public ResponseEntity<Void> creatSchedule(@AuthenticationPrincipal UserInfo userInfo,
                                               @PathVariable Long teamId,
                                               @RequestBody @Valid CreateScheduleDto dto) {
@@ -26,14 +26,14 @@ public class ScheduleController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/teams/{teamId}/schedules")
+    @GetMapping("/teams/{teamId}")
     public ResponseEntity<List<ScheduleInformDto>> getTeamSchedules(@AuthenticationPrincipal UserInfo userInfo,
                                                                     @PathVariable Long teamId) {
         List<ScheduleInformDto> schedules = scheduleService.getTeamSchedules(teamId, userInfo.id());
         return ResponseEntity.ok(schedules);
     }
 
-    @GetMapping("/users/schedules")
+    @GetMapping("/users")
     public ResponseEntity<List<ScheduleInformDto>> getUserSchedules(@AuthenticationPrincipal UserInfo userInfo) {
         List<ScheduleInformDto> schedules = scheduleService.getUserSchedules(userInfo.id());
         return ResponseEntity.ok(schedules);
