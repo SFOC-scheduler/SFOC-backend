@@ -51,8 +51,15 @@ public class ScheduleService {
                 .toList();
     }
 
-    public List<ScheduleInformDto> getAllSchedules(Long userId) {
+    public List<ScheduleInformDto> getUserSchedules(Long userId) {
         return scheduleRepository.findAllByTeamMember_User_Id(userId).stream()
+                .map(schedule -> ScheduleInformDto.from(
+                        schedule, subScheduleRepository.findAllBySchedule_Id(schedule.getId())))
+                .toList();
+    }
+
+    public List<ScheduleInformDto> getAllSchedules(Long userId) {
+        return scheduleRepository.findAllByUser_Id(userId).stream()
                 .map(schedule -> ScheduleInformDto.from(
                         schedule, subScheduleRepository.findAllBySchedule_Id(schedule.getId())))
                 .toList();

@@ -162,7 +162,7 @@ class ScheduleServiceTest {
     }
 
     @Test
-    @DisplayName("팀 일정 전체 조회 실패")
+    @DisplayName("팀 일정 조회 실패")
     void getTeamSchedulesTestFailure() {
         // given
         Team team = getTeam();
@@ -179,7 +179,7 @@ class ScheduleServiceTest {
     }
 
     @Test
-    @DisplayName("팀 일정 전체 조회 성공")
+    @DisplayName("팀 일정 조회 성공")
     void getTeamSchedulesTestSuccess() {
         // given
         User user = getUser();
@@ -203,8 +203,8 @@ class ScheduleServiceTest {
     }
 
     @Test
-    @DisplayName("일정 전체 조회")
-    void getAllSchedules() {
+    @DisplayName("사용자 일정 조회")
+    void getUserSchedules() {
         // given
         User user = getUser();
         Team team = getTeam();
@@ -212,6 +212,28 @@ class ScheduleServiceTest {
         Schedule schedule = getSchedule(teamMember);
         List<SubSchedule> subSchedules = getSubSchedules(schedule);
         given(scheduleRepository.findAllByTeamMember_User_Id(user.getId()))
+                .willReturn(List.of(schedule));
+        given(subScheduleRepository.findAllBySchedule_Id(schedule.getId()))
+                .willReturn(subSchedules);
+
+        // when
+        List<ScheduleInformDto> userSchedules = scheduleService.getUserSchedules(user.getId());
+
+        // then
+        assertThat(userSchedules.size()).isEqualTo(1L);
+        assertThat(userSchedules.get(0).subScheduleInforms().size()).isEqualTo(subSchedules.size());
+    }
+
+    @Test
+    @DisplayName("모든 일정 조회")
+    void getAllSchedules() {
+        // given
+        User user = getUser();
+        Team team = getTeam();
+        TeamMember teamMember = getTeamMember(user, team);
+        Schedule schedule = getSchedule(teamMember);
+        List<SubSchedule> subSchedules = getSubSchedules(schedule);
+        given(scheduleRepository.findAllByUser_Id(user.getId()))
                 .willReturn(List.of(schedule));
         given(subScheduleRepository.findAllBySchedule_Id(schedule.getId()))
                 .willReturn(subSchedules);
