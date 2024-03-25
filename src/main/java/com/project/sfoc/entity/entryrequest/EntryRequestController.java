@@ -27,8 +27,9 @@ public class EntryRequestController {
 
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteRequest(@RequestBody RequestDeleteTeamRequestDto requestRefuseDto) {
-        entryRequestService.applyOrRequest(requestRefuseDto);
+    public ResponseEntity<Void> deleteRequest(@RequestBody RequestDeleteTeamRequestDto dto,
+                                              @AuthenticationPrincipal UserInfo userInfo) {
+        entryRequestService.applyOrRequest(userInfo.id(),  dto);
 
         return ResponseEntity.ok().build();
     }

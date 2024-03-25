@@ -9,6 +9,9 @@ import com.project.sfoc.entity.teammember.TeamMember;
 import com.project.sfoc.entity.teammember.TeamMemberRepository;
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.entity.user.UserRepository;
+import com.project.sfoc.exception.EntityNotFoundException;
+import com.project.sfoc.exception.Error;
+import com.project.sfoc.exception.PermissionDeniedError;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,15 +39,19 @@ public class EntryRequestService {
     }
 
 
-    public void applyOrRequest(RequestDeleteTeamRequestDto requestAcceptDto) {
+    public void applyOrRequest(Long userId, RequestDeleteTeamRequestDto dto) {
 
-        getTeamGrant(requestAcceptDto.teamId(), requestAcceptDto.userId());
-        entryRequestRepository.deleteById(requestAcceptDto.entryRequestId());
-        if(requestAcceptDto.apply()) {
-            Team team = teamRepository.findById(requestAcceptDto.teamId()).
-                    orElseThrow(IllegalArgumentException::new);
-            User user = userRepository.findById(requestAcceptDto.userId()).
-                    orElseThrow(IllegalArgumentException::new);
+        getTeamGrant(dto.teamId(), userId);
+
+        EntryRequest entryRequest = entryRequestRepository.findByTeam_IdAndUser_Id(dto.teamId(), dto.userId())
+                .orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
+        entryRequestRepository.delete(entryRequest);
+
+        if(dto.apply()) {
+            Team team = teamRepository.findById(dto.teamId()).
+                    orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
+            User user = userRepository.findById(dto.userId()).
+                    orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
             TeamMember teamMember = TeamMember.of(user, team, TeamGrant.NORMAL);
             teamMemberRepository.save(teamMember);
             log.info("팀 참가 수락");
@@ -56,10 +63,9 @@ public class EntryRequestService {
     private void getTeamGrant(Long teamId, Long userId) {
         TeamGrant teamGrant = teamMemberRepository.findByTeam_IdAndUser_Id(teamId, userId)
                 .map(TeamMember::getTeamGrant)
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
         if(teamGrant == TeamGrant.NORMAL) {
-            log.info("권한이 없습니다.");
-            throw new IllegalStateException();
+            throw new PermissionDeniedError(Error.DENIED_ACCESS);
         }
 
     }
