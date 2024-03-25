@@ -31,6 +31,7 @@ spring:
         show_sql: true
         format_sql: true
         highlight_sql: true
+        default_batch_fetch_size: 100
   security:
     oauth2:
       client:
