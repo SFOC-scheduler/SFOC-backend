@@ -57,7 +57,7 @@ public class TeamController {
     }
 
     @PatchMapping("/{teamId}")
-    public ResponseEntity<Void> setTeam(@RequestBody UpdateTeamInfo teamInfoDto,
+    public ResponseEntity<Void> setTeam(@RequestBody RequestUpdateTeamInfo teamInfoDto,
                                                   @PathVariable(name = "teamId") Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
         teamService.updateTeamInfo(teamInfoDto, teamId, userInfo.id());
         log.info("팀 설정 수정");

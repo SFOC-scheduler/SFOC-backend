@@ -8,6 +8,10 @@ import com.project.sfoc.entity.teammember.TeamMember;
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.entity.user.UserRepository;
 import com.project.sfoc.entity.teammember.TeamMemberRepository;
+import com.project.sfoc.exception.EntityNotFoundException;
+import com.project.sfoc.exception.Error;
+import com.project.sfoc.exception.IllegalDtoException;
+import com.project.sfoc.exception.PermissionDeniedError;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -49,13 +53,11 @@ public class TeamService {
 
     public void entryTeam(TeamMemberDto teamMemberDto) {
         if (teamMemberRepository.existsByTeam_IdAndUser_Id(teamMemberDto.teamId(), teamMemberDto.userId())) {
-            log.info("이미 팀에 존재합니다.");
-            throw new IllegalArgumentException();
+            throw new IllegalDtoException("이미 팀에 존재합니다.", Error.INVALID_DTO);
         }
 
         if (entryRequestRepository.existsByTeam_IdAndUser_Id(teamMemberDto.teamId(), teamMemberDto.userId())) {
-            log.info("이미 신청한 팀입니다.");
-            throw new IllegalArgumentException();
+            throw new IllegalDtoException("이미 신청한 팀입니다.", Error.INVALID_DTO);
         }
 
         User user = userRepository.findById(teamMemberDto.userId()).orElseThrow(IllegalArgumentException::new);
@@ -71,13 +73,8 @@ public class TeamService {
             entryRequestRepository.save(entryRequest);
 
         } else if (disclosure == Disclosure.PRIVATE) {
-            log.info("팀에 참가할 수 없습니다.");
-            throw new IllegalStateException();
-        } else {
-            log.info("Disclosure 오류");
-            throw new IllegalStateException();
+            throw new PermissionDeniedError(Error.DENIED_ACCESS);
         }
-
     }
 
 
@@ -91,11 +88,10 @@ public class TeamService {
     }
 
     // TODO 성능?
-    public void updateTeamInfo(UpdateTeamInfo teamInfoDto, Long teamId, Long userId) {
+    public void updateTeamInfo(RequestUpdateTeamInfo teamInfoDto, Long teamId, Long userId) {
 
         if (teamMemberRepository.existsByUserNicknameAndTeam_Id(teamInfoDto.userNickname(), teamId)) {
-            log.info("닉네임 중복 오류");
-            throw new IllegalArgumentException();
+            throw new IllegalDtoException("닉네임이 이미 팀에 존재합니다.", Error.INVALID_DTO);
         }
 
         TeamMember teamMember = findTeamMemberByTeamAndUser(teamId, userId);
@@ -123,11 +119,11 @@ public class TeamService {
 
 
     private Team findTeamByTeamId(Long teamId) {
-            return teamRepository.findById(teamId).orElseThrow(IllegalArgumentException::new);
+            return teamRepository.findById(teamId).orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
         }
 
     private TeamMember findTeamMemberByTeamAndUser(Long teamId, Long userId) {
-        return teamMemberRepository.findByTeam_IdAndUser_Id(teamId, userId).orElseThrow(IllegalArgumentException::new);
+        return teamMemberRepository.findByTeam_IdAndUser_Id(teamId, userId).orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
     }
 
 }

@@ -2,7 +2,7 @@ package com.project.sfoc.entity.teammember;
 
 import com.project.sfoc.entity.team.Team;
 import com.project.sfoc.entity.team.dto.AbstractTeamInfoDto;
-import com.project.sfoc.entity.team.dto.UpdateTeamInfo;
+import com.project.sfoc.entity.team.dto.RequestUpdateTeamInfo;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.TriConsumer;
 
@@ -26,12 +26,12 @@ public enum TeamGrant {
                 teamInform.description(), teamInform.disclosure());
     }, ((team, teamMember) -> AbstractTeamInfoDto.from(teamMember)));
 
-    private final TriConsumer<UpdateTeamInfo, Team, TeamMember> update;
+    private final TriConsumer<RequestUpdateTeamInfo, Team, TeamMember> update;
 
     private final BiFunction<Team, TeamMember, AbstractTeamInfoDto> getInfo;
 
 
-    public void update(UpdateTeamInfo updateTeamInfo, Team team, TeamMember teamMember) {
+    public void update(RequestUpdateTeamInfo updateTeamInfo, Team team, TeamMember teamMember) {
         this.update.accept(updateTeamInfo, team, teamMember);
     }
 
