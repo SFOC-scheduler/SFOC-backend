@@ -65,18 +65,25 @@ class ScheduleServiceTest {
                 PeriodRepeat.of(
                         PeriodType.DAY, 1L, List.of(LocalDate.now()),
                         RepeatType.COUNT, 5, null));
+
+        List<SubSchedule> subSchedules = getSubSchedules(schedule);
         ReflectionTestUtils.setField(schedule, "id", 4L);
+        ReflectionTestUtils.setField(schedule, "subSchedules", subSchedules);
+
         return schedule;
     }
 
     private List<SubSchedule> getSubSchedules(Schedule schedule) {
         return IntStream.range(0, schedule.getPeriodRepeat().repeatCount())
-                .mapToObj(count -> SubSchedule.of(
-                        Boolean.FALSE, Boolean.FALSE,
-                        LocalDateTime.now().plusDays(count),
-                        LocalDateTime.now().plusDays(count).plusHours(schedule.getPeriodRepeat().interval()),
-                        schedule))
-                .toList();
+                .mapToObj(count -> {
+                    SubSchedule subSchedule = SubSchedule.of(
+                            Boolean.FALSE, Boolean.FALSE,
+                            LocalDateTime.now().plusDays(count),
+                            LocalDateTime.now().plusDays(count).plusHours(schedule.getPeriodRepeat().interval()),
+                            schedule);
+                    ReflectionTestUtils.setField(subSchedule, "id", count + 5L);
+                    return subSchedule;
+                }).toList();
     }
 
     private CreateScheduleDto getCreateScheduleDto(LocalDateTime startDateTime, LocalDateTime endDateTime, Boolean isEnableDday,
@@ -186,20 +193,17 @@ class ScheduleServiceTest {
         Team team = getTeam();
         TeamMember teamMember = getTeamMember(user, team);
         Schedule schedule = getSchedule(teamMember);
-        List<SubSchedule> subSchedules = getSubSchedules(schedule);
         given(teamMemberRepository.existsByTeam_IdAndUser_Id(team.getId(), user.getId()))
                 .willReturn(true);
         given(scheduleRepository.findAllByTeamMember_Team_Id(team.getId()))
                 .willReturn(List.of(schedule));
-        given(subScheduleRepository.findAllBySchedule_Id(schedule.getId()))
-                .willReturn(subSchedules);
 
         // when
         List<ScheduleInformDto> teamSchedules = scheduleService.getTeamSchedules(team.getId(), user.getId());
 
         // then
         assertThat(teamSchedules.size()).isEqualTo(1L);
-        assertThat(teamSchedules.get(0).subScheduleInforms().size()).isEqualTo(subSchedules.size());
+        assertThat(teamSchedules.get(0).subScheduleInforms().size()).isEqualTo(schedule.getSubSchedules().size());
     }
 
     @Test
@@ -210,18 +214,15 @@ class ScheduleServiceTest {
         Team team = getTeam();
         TeamMember teamMember = getTeamMember(user, team);
         Schedule schedule = getSchedule(teamMember);
-        List<SubSchedule> subSchedules = getSubSchedules(schedule);
         given(scheduleRepository.findAllByTeamMember_User_Id(user.getId()))
                 .willReturn(List.of(schedule));
-        given(subScheduleRepository.findAllBySchedule_Id(schedule.getId()))
-                .willReturn(subSchedules);
 
         // when
         List<ScheduleInformDto> userSchedules = scheduleService.getUserSchedules(user.getId());
 
         // then
         assertThat(userSchedules.size()).isEqualTo(1L);
-        assertThat(userSchedules.get(0).subScheduleInforms().size()).isEqualTo(subSchedules.size());
+        assertThat(userSchedules.get(0).subScheduleInforms().size()).isEqualTo(schedule.getSubSchedules().size());
     }
 
     @Test
@@ -232,18 +233,15 @@ class ScheduleServiceTest {
         Team team = getTeam();
         TeamMember teamMember = getTeamMember(user, team);
         Schedule schedule = getSchedule(teamMember);
-        List<SubSchedule> subSchedules = getSubSchedules(schedule);
         given(scheduleRepository.findAllByUser_Id(user.getId()))
                 .willReturn(List.of(schedule));
-        given(subScheduleRepository.findAllBySchedule_Id(schedule.getId()))
-                .willReturn(subSchedules);
 
         // when
         List<ScheduleInformDto> allSchedules = scheduleService.getAllSchedules(user.getId());
 
         // then
         assertThat(allSchedules.size()).isEqualTo(1L);
-        assertThat(allSchedules.get(0).subScheduleInforms().size()).isEqualTo(subSchedules.size());
+        assertThat(allSchedules.get(0).subScheduleInforms().size()).isEqualTo(schedule.getSubSchedules().size());
     }
 
 }
