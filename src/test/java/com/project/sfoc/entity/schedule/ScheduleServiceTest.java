@@ -162,7 +162,7 @@ class ScheduleServiceTest {
     }
 
     @Test
-    @DisplayName("팀 일정 전체 조회 실패")
+    @DisplayName("팀 일정 조회 실패")
     void getTeamSchedulesTestFailure() {
         // given
         Team team = getTeam();
@@ -179,7 +179,7 @@ class ScheduleServiceTest {
     }
 
     @Test
-    @DisplayName("팀 일정 전체 조회 성공")
+    @DisplayName("팀 일정 조회 성공")
     void getTeamSchedulesTestSuccess() {
         // given
         User user = getUser();
@@ -203,8 +203,8 @@ class ScheduleServiceTest {
     }
 
     @Test
-    @DisplayName("일정 전체 조회")
-    void getAllSchedules() {
+    @DisplayName("사용자 일정 조회")
+    void getUserSchedules() {
         // given
         User user = getUser();
         Team team = getTeam();
@@ -217,7 +217,7 @@ class ScheduleServiceTest {
                 .willReturn(subSchedules);
 
         // when
-        List<ScheduleInformDto> allSchedules = scheduleService.getAllSchedules(user.getId());
+        List<ScheduleInformDto> allSchedules = scheduleService.getUserSchedules(user.getId());
 
         // then
         assertThat(allSchedules.size()).isEqualTo(1L);

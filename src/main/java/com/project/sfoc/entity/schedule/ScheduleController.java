@@ -33,9 +33,9 @@ public class ScheduleController {
         return ResponseEntity.ok(schedules);
     }
 
-    @GetMapping("/schedules")
-    public ResponseEntity<List<ScheduleInformDto>> getAllSchedules(@AuthenticationPrincipal UserInfo userInfo) {
-        List<ScheduleInformDto> schedules = scheduleService.getAllSchedules(userInfo.id());
+    @GetMapping("/users/schedules")
+    public ResponseEntity<List<ScheduleInformDto>> getUserSchedules(@AuthenticationPrincipal UserInfo userInfo) {
+        List<ScheduleInformDto> schedules = scheduleService.getUserSchedules(userInfo.id());
         return ResponseEntity.ok(schedules);
     }
 
