@@ -1,9 +1,6 @@
 package com.project.sfoc.entity.teammember;
 
-import com.project.sfoc.entity.Provider;
-import com.project.sfoc.entity.teammember.TeamMember;
-import com.project.sfoc.entity.teammember.TeamMemberRepository;
-import com.project.sfoc.entity.teammember.TeamMemberService;
+import com.project.sfoc.entity.user.Provider;
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.entity.team.Disclosure;
 import com.project.sfoc.entity.team.Team;
@@ -84,12 +81,6 @@ class TeamMemberServiceTest {
     @Test
     @DisplayName("일반 멤버가 팀에서의 권한 설정을 위한 팀 멤버 리스트 조회 테스트")
     public void teamMemberService_findTeamMembers_Throw_IllegalStateException() {
-
-        TeamMember teamMember = TeamMember.of(user, team, NORMAL);
-        teamMembers.add(teamMember);
-
-        when(teamMemberRepository.findByTeam_IdAndUser_Id(any(Long.class), any(Long.class))).
-                thenReturn(Optional.of(teamMember));
 
 
     }

@@ -11,9 +11,7 @@ public record RequestTeamDto(
     @NotNull(message = "팀 설명을 적어주세요")
     String description,
     @ValidEnum(enumClass = Disclosure.class, message = "팀 권한을 선택해주세요")
-    Disclosure disclosure,
-    @NotNull(message = "팀 닉네임을 적어주세요")
-    String userNickname
+    Disclosure disclosure
 ) {
 
     public Team toEntity(String invitationCode) {
