@@ -239,7 +239,7 @@ class ScheduleServiceTest {
                 .willReturn(subSchedules);
 
         // when
-        List<ScheduleInformDto> allSchedules = scheduleService.getUserSchedules(user.getId());
+        List<ScheduleInformDto> allSchedules = scheduleService.getAllSchedules(user.getId());
 
         // then
         assertThat(allSchedules.size()).isEqualTo(1L);
