@@ -5,17 +5,15 @@ import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.FieldReflectionArbitraryIntrospector;
 import com.project.sfoc.entity.entryrequest.EntryRequest;
 import com.project.sfoc.entity.entryrequest.EntryRequestRepository;
-import com.project.sfoc.entity.team.Disclosure;
-import com.project.sfoc.entity.team.Team;
-import com.project.sfoc.entity.team.TeamRepository;
-import com.project.sfoc.entity.team.TeamService;
 import com.project.sfoc.entity.team.dto.*;
 import com.project.sfoc.entity.teammember.TeamGrant;
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.entity.user.UserRepository;
 import com.project.sfoc.entity.teammember.TeamMember;
 import com.project.sfoc.entity.teammember.TeamMemberRepository;
-import org.junit.jupiter.api.Assertions;
+import com.project.sfoc.exception.Error;
+import com.project.sfoc.exception.IllegalDtoException;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,8 +70,8 @@ class TeamServiceTest {
         return team;
     }
 
-    private TeamMember getTeamMember(Team team, TeamGrant teamGrant) {
-        return TeamMember.of(getUser(), team, teamGrant);
+    private TeamMember getTeamMember(User user, Team team, TeamGrant teamGrant) {
+        return TeamMember.of(user, team, teamGrant);
     }
 
     private List<Team> getTeams() {
@@ -123,8 +121,8 @@ class TeamServiceTest {
         User user = getUser();
         Team team = getTeam(PUBLIC);
         RequestTeamDto requestTeamDto =
-                new RequestTeamDto("team1", "팀에 대한 설명입니다.", PUBLIC, "abc");
-        TeamMember teamMember = getTeamMember(team, HIGHEST_ADMIN);
+                new RequestTeamDto("team1", "팀에 대한 설명입니다.", PUBLIC);
+        TeamMember teamMember = getTeamMember(user, team, HIGHEST_ADMIN);
 
         given(teamRepository.existsByInvitationCode(any(String.class))).willReturn(false);
         given(teamRepository.save(any(Team.class))).willReturn(team);
@@ -173,7 +171,7 @@ class TeamServiceTest {
         Team team = getTeam(PUBLIC);
         User user = getUser();
         TeamMemberDto teamMemberDto = TeamMemberDto.of(1L, 1L, NORMAL);
-        TeamMember teamMember = getTeamMember(team, HIGHEST_ADMIN);
+        TeamMember teamMember = getTeamMember(user, team, HIGHEST_ADMIN);
 
         given(teamMemberRepository.existsByTeam_IdAndUser_Id(team.getId(), user.getId())).
                 willReturn(false);
@@ -234,13 +232,15 @@ class TeamServiceTest {
         given(entryRequestRepository.existsByTeam_IdAndUser_Id(team.getId(), user.getId())).willReturn(true);
 
         //When
-        IllegalArgumentException illegalArgumentException1 = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> teamService.entryTeam(teamMemberDto));
-        IllegalArgumentException illegalArgumentException2 = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> teamService.entryTeam(teamMemberDto));
-
         //Then
-
+        Assertions.assertThatThrownBy(() -> teamService.entryTeam(teamMemberDto))
+                .isInstanceOf(IllegalDtoException.class)
+                .extracting("error")
+                .isEqualTo(Error.INVALID_DTO);
+        Assertions.assertThatThrownBy(() -> teamService.entryTeam(teamMemberDto))
+                .isInstanceOf(IllegalDtoException.class)
+                .extracting("error")
+                .isEqualTo(Error.INVALID_DTO);
     }
 
     @Test
@@ -249,7 +249,7 @@ class TeamServiceTest {
         //Given
         Team team = getTeam(PUBLIC);
         User user = getUser();
-        TeamMember teamMember = getTeamMember(team, NORMAL);
+        TeamMember teamMember = getTeamMember(user, team, NORMAL);
 
         given(teamRepository.findById(team.getId())).willReturn(Optional.of(team));
         given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId())).willReturn(Optional.of(teamMember));
@@ -272,7 +272,7 @@ class TeamServiceTest {
         //Given
         Team team = getTeam(PUBLIC);
         User user = getUser();
-        TeamMember teamMember = getTeamMember(team, NORMAL);
+        TeamMember teamMember = getTeamMember(user, team, NORMAL);
 
         given(teamRepository.findById(team.getId())).willReturn(Optional.of(team));
         given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId())).willReturn(Optional.of(teamMember));
@@ -296,7 +296,7 @@ class TeamServiceTest {
         //Given
         Team team = getTeam(PUBLIC);
         User user = getUser();
-        TeamMember teamMember = getTeamMember(team, HIGHEST_ADMIN);
+        TeamMember teamMember = getTeamMember(user, team, HIGHEST_ADMIN);
 
         given(teamRepository.findById(team.getId())).willReturn(Optional.of(team));
         given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId())).willReturn(Optional.of(teamMember));
@@ -319,12 +319,12 @@ class TeamServiceTest {
     @DisplayName("관리자가 팀 정보 업데이트 테스트")
     public void updateTeamMemberAndTeam_Return_Void() {
         //Given
-        UpdateTeamInfo updateTeamInfo = new UpdateTeamInfo("team update", "팀이 변경되었습니다.",
+        RequestUpdateTeamInfo updateTeamInfo = new RequestUpdateTeamInfo("team update", "팀이 변경되었습니다.",
                 Disclosure.APPROVAL, "팀 변경 닉네임", "유저 변경 닉네임");
 
         Team team = getTeam(PUBLIC);
         User user = getUser();
-        TeamMember teamMember = getTeamMember(team, HIGHEST_ADMIN);
+        TeamMember teamMember = getTeamMember(user, team, HIGHEST_ADMIN);
         String userNickname = updateTeamInfo.userNickname();
 
 
@@ -353,11 +353,11 @@ class TeamServiceTest {
     public void updateTeamMember_Return_Void() {
         //Given
 
-        UpdateTeamInfo updateTeamInfo = new UpdateTeamInfo("team update", "팀이 변경되었습니다.",
+        RequestUpdateTeamInfo updateTeamInfo = new RequestUpdateTeamInfo("team update", "팀이 변경되었습니다.",
                 Disclosure.APPROVAL, "팀 변경 닉네임", "유저 변경 닉네임");
         Team team = getTeam(PUBLIC);
         User user = getUser();
-        TeamMember teamMember = getTeamMember(team, HIGHEST_ADMIN);
+        TeamMember teamMember = getTeamMember(user, team, HIGHEST_ADMIN);
         String userNickname = updateTeamInfo.userNickname();
 
 

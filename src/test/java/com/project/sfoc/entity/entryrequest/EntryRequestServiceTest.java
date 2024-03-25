@@ -1,6 +1,6 @@
 package com.project.sfoc.entity.entryrequest;
 
-import com.project.sfoc.entity.Provider;
+import com.project.sfoc.entity.entryrequest.dto.RequestDeleteTeamRequestDto;
 import com.project.sfoc.entity.entryrequest.dto.ResponseRequestEntryDto;
 import com.project.sfoc.entity.team.Disclosure;
 import com.project.sfoc.entity.team.Team;
@@ -8,8 +8,13 @@ import com.project.sfoc.entity.team.TeamRepository;
 import com.project.sfoc.entity.teammember.TeamGrant;
 import com.project.sfoc.entity.teammember.TeamMember;
 import com.project.sfoc.entity.teammember.TeamMemberRepository;
+import com.project.sfoc.entity.user.Provider;
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.entity.user.UserRepository;
+import com.project.sfoc.exception.EntityNotFoundException;
+import com.project.sfoc.exception.Error;
+import com.project.sfoc.exception.PermissionDeniedError;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +30,7 @@ import java.util.Optional;
 import static com.project.sfoc.entity.teammember.TeamGrant.HIGHEST_ADMIN;
 import static com.project.sfoc.entity.teammember.TeamGrant.NORMAL;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.BDDMockito.given;
 
@@ -58,8 +64,8 @@ public class EntryRequestServiceTest {
         return user;
     }
 
-    private TeamMember getTeamMember(Team team, TeamGrant teamGrant) {
-        return TeamMember.of(getUser(1L), team, teamGrant);
+    private TeamMember getTeamMember(User user, Team team, TeamGrant teamGrant) {
+        return TeamMember.of(user, team, teamGrant);
     }
 
     private List<User> getUsers() {
@@ -76,6 +82,10 @@ public class EntryRequestServiceTest {
         return users;
     }
 
+    private EntryRequest getEntryRequest(User user, Team team) {
+        return EntryRequest.of(user, team);
+    }
+
 
     @Test
     @DisplayName("팀 신청자 목록 조회")
@@ -83,7 +93,7 @@ public class EntryRequestServiceTest {
         //Given
         Team team = getTeam(Disclosure.PUBLIC);
         User user = getUser(1L);
-        TeamMember teamMember = getTeamMember(team, HIGHEST_ADMIN);
+        TeamMember teamMember = getTeamMember(user, team, HIGHEST_ADMIN);
         List<User> users = getUsers();
 
         given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId())).willReturn(Optional.of(teamMember));
@@ -102,35 +112,106 @@ public class EntryRequestServiceTest {
     }
 
     @Test
-    @DisplayName("팀 신청자 목록 조회 실패")
+    @DisplayName("팀 신청자 목록 조회 실패 - 팀 권한 없음")
     void getRequestEntries_fail() {
         //Given
         Team team = getTeam(Disclosure.PUBLIC);
         User user = getUser(1L);
-        TeamMember teamMember = getTeamMember(team, NORMAL);
+        TeamMember teamMember = getTeamMember(user, team, NORMAL);
 
         given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId())).willReturn(Optional.of(teamMember));
 
         //When
-        entryRequestService.getRequestEntries(team.getId(), user.getId());
-
         //Then
-
+        assertThatThrownBy(() -> entryRequestService.getRequestEntries(team.getId(), user.getId()))
+                .isInstanceOf(PermissionDeniedError.class)
+                .extracting("error").isEqualTo(Error.DENIED_ACCESS);
 
     }
 
     @Test
     @DisplayName("팀 신청 수락 테스트")
     void apply() {
+        //Given
+        RequestDeleteTeamRequestDto dto = new RequestDeleteTeamRequestDto(1L, 2L, true);
+        Team team = getTeam(Disclosure.PUBLIC);
+        User user = getUser(dto.userId());
+        User admin = getUser(1L);
+        TeamMember teamMember = getTeamMember(user, team, HIGHEST_ADMIN);
+        EntryRequest entryRequest = getEntryRequest(user, team);
+
+
+        given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), admin.getId())).willReturn(Optional.of(teamMember));
+        given(entryRequestRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId())).willReturn(Optional.of(entryRequest));
+        given(teamRepository.findById(team.getId())).willReturn(Optional.of(team));
+        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
+        given(teamMemberRepository.save(any(TeamMember.class))).willReturn(teamMember);
+
+        //When
+        entryRequestService.applyOrRequest(admin.getId(), dto);
+
+        //Then
+        assertThat(dto.apply()).isEqualTo(true);
+
+        then(teamMemberRepository).should().findByTeam_IdAndUser_Id(team.getId(), admin.getId());
+        then(entryRequestRepository).should().findByTeam_IdAndUser_Id(team.getId(), user.getId());
+        then(entryRequestRepository).should().delete(entryRequest);
+        then(teamRepository).should().findById(team.getId());
+        then(userRepository).should().findById(user.getId());
+        then(teamMemberRepository).should().save(any(TeamMember.class));
 
     }
 
 
     @Test
+    @DisplayName("팀 신청 수락 실패 - 조회 실패")
+    void applyFailure() {
+        //Given
+        RequestDeleteTeamRequestDto dto = new RequestDeleteTeamRequestDto(1L, 2L, false);
+        Team team = getTeam(Disclosure.PUBLIC);
+        User user = getUser(dto.userId());
+        User admin = getUser(1L);
+        TeamMember teamMember = getTeamMember(user, team, HIGHEST_ADMIN);
+        EntryRequest entryRequest = getEntryRequest(user, team);
+
+
+        given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), admin.getId())).willReturn(Optional.of(teamMember));
+        given(entryRequestRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId())).willReturn(Optional.empty());
+
+        //When
+        //Then
+        assertThatThrownBy(() -> entryRequestService.applyOrRequest(admin.getId(), dto))
+                .isInstanceOf(EntityNotFoundException.class)
+                .extracting("error")
+                .isEqualTo(Error.INVALID_DTO);
+    }
+
+    @Test
     @DisplayName("팀 신청 거절 테스트")
     void reject() {
+        //Given
+        RequestDeleteTeamRequestDto dto = new RequestDeleteTeamRequestDto(1L, 2L, false);
+        Team team = getTeam(Disclosure.PUBLIC);
+        User user = getUser(dto.userId());
+        User admin = getUser(1L);
+        TeamMember teamMember = getTeamMember(user, team, HIGHEST_ADMIN);
+        EntryRequest entryRequest = getEntryRequest(user, team);
 
+
+        given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), admin.getId())).willReturn(Optional.of(teamMember));
+        given(entryRequestRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId())).willReturn(Optional.of(entryRequest));
+
+        //When
+        entryRequestService.applyOrRequest(admin.getId(), dto);
+
+        //Then
+        assertThat(dto.apply()).isEqualTo(false);
+
+        then(teamMemberRepository).should().findByTeam_IdAndUser_Id(team.getId(), admin.getId());
+        then(entryRequestRepository).should().findByTeam_IdAndUser_Id(team.getId(), user.getId());
+        then(entryRequestRepository).should().delete(entryRequest);
     }
+
 
 
 
