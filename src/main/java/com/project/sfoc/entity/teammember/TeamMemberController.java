@@ -20,7 +20,7 @@ public class TeamMemberController {
 
 
     @GetMapping("/{teamId}/members")
-    public ResponseEntity<List<TeamMemberResponseDto>> findAllTeamMembers(@PathVariable Long teamId,
+    public ResponseEntity<List<TeamMemberResponseDto>> findAllTeamMembers(@PathVariable(name = "teamId") Long teamId,
                                                                           @AuthenticationPrincipal UserInfo userInfo) {
 
         Long userId = userInfo.id();
@@ -32,7 +32,7 @@ public class TeamMemberController {
 
     @DeleteMapping("/{teamId}")
     public ResponseEntity<DeleteTeamMemberDto> deleteTeamMember(@RequestBody DeleteTeamMemberDto deleteTeamMemberDto,
-                                            @PathVariable Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
+                                            @PathVariable(name = "teamId") Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
 
         Long userId = userInfo.id();
 
@@ -43,7 +43,7 @@ public class TeamMemberController {
 
     @PatchMapping("/{teamId}/grant")
     public ResponseEntity<UpdateTeamGrantDto> updateTeamGrant(@RequestBody UpdateTeamGrantDto updateTeamGrantDto,
-                                                              @PathVariable Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
+                                                              @PathVariable(name = "teamId") Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
 
         Long userId = userInfo.id();
 

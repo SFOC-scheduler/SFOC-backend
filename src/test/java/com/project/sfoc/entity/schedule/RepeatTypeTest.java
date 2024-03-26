@@ -40,7 +40,7 @@ class RepeatTypeTest {
     }
 
     private TeamMember getTeamMember() {
-        TeamMember teamMember = TeamMember.of("팀 닉네임", "닉네임", TeamGrant.NORMAL, getUser(), getTeam());
+        TeamMember teamMember = TeamMember.of(getUser(), getTeam(), TeamGrant.NORMAL);
         ReflectionTestUtils.setField(teamMember, "id", 3L);
         return teamMember;
     }

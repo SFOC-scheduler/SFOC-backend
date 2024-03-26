@@ -55,7 +55,7 @@ class ScheduleServiceTest {
     }
 
     private TeamMember getTeamMember(User user, Team team) {
-        TeamMember teamMember = TeamMember.of("팀 닉네임", "닉네임", TeamGrant.NORMAL, user, team);
+        TeamMember teamMember = TeamMember.of(user, team, TeamGrant.NORMAL);
         ReflectionTestUtils.setField(teamMember, "id", 3L);
         return teamMember;
     }
