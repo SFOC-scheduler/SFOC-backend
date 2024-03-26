@@ -14,13 +14,16 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     boolean existsByInvitationCode(String invitationCode);
 
 
-    @Query(value = "select t " +
-            "from Team t " +
-            "join t.teamMembers tm " +
-            "where tm.user.id = :userId")
+
+    @Query("""
+    select t 
+    from Team t 
+    where t.id in (select tm.team.id 
+    from TeamMember tm 
+    where tm.user.id = :userId)""")
     List<Team> findTeams(@Param("userId") Long userId);
 
-    // on절 사용하는 것이 필터링이 돼서 더 성능이 향상 될 것 같다.
+//     on절 사용하는 것이 필터링이 돼서 더 성능이 향상 될 것 같다.
     @Query("select new com.project.sfoc.entity.team.dto.ResponseTeamSearchInfoDto(t.id, t.name, t.description, u.email) " +
             "from Team t " +
             "join t.teamMembers tm join tm.user u " +

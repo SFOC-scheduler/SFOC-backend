@@ -32,7 +32,7 @@ public class EntryRequestService {
 
     public List<ResponseRequestEntryDto> getRequestEntries(Long userId, Long teamId) {
 
-        getTeamGrant(teamId, userId);
+        checkAuthority(teamId, userId);
 
         List<User> users = userRepository.findRequestEntries(teamId);
         return users.stream().map(user -> ResponseRequestEntryDto.from(user, teamId)).toList();
@@ -41,7 +41,7 @@ public class EntryRequestService {
 
     public void applyOrRequest(Long userId, RequestDeleteTeamRequestDto dto) {
 
-        getTeamGrant(dto.teamId(), userId);
+        checkAuthority(dto.teamId(), userId);
 
         EntryRequest entryRequest = entryRequestRepository.findByTeam_IdAndUser_Id(dto.teamId(), dto.userId())
                 .orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
@@ -60,13 +60,12 @@ public class EntryRequestService {
         }
     }
 
-    private void getTeamGrant(Long teamId, Long userId) {
+    private void checkAuthority(Long teamId, Long userId) {
         TeamGrant teamGrant = teamMemberRepository.findByTeam_IdAndUser_Id(teamId, userId)
                 .map(TeamMember::getTeamGrant)
                 .orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
         if(teamGrant == TeamGrant.NORMAL) {
             throw new PermissionDeniedError(Error.DENIED_ACCESS);
         }
-
     }
 }

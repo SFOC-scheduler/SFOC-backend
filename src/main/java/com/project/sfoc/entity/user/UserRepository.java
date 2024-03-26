@@ -10,6 +10,11 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByProviderAndSub(Provider provider, String sub);
 
-    @Query("select u from User u join EntryRequest er where er.team.id = :teamId")
+    @Query("""
+    select u
+    from User u
+    where u.id in (select er.user.id
+                    from EntryRequest er
+                    where er.team.id = :teamId)""")
     List<User> findRequestEntries(@Param("teamId") Long teamId);
 }
