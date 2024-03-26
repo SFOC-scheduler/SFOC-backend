@@ -27,11 +27,11 @@ public class TeamMember {
     @Column(name = "team_grant_type")
     private TeamGrant teamGrant;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;
 

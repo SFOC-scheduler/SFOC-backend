@@ -14,12 +14,12 @@ public record ScheduleInformDto(
         List<SubScheduleInformDto> subScheduleInforms
 ) {
 
-    public static ScheduleInformDto from(Schedule schedule, List<SubSchedule> subSchedules) {
+    public static ScheduleInformDto from(Schedule schedule) {
         return new ScheduleInformDto(
                 schedule.getTitle(),
                 schedule.getMemo(),
                 schedule.getPeriodRepeat(),
-                SubScheduleInformDto.from(subSchedules)
+                SubScheduleInformDto.from(schedule.getSubSchedules())
         );
     }
 

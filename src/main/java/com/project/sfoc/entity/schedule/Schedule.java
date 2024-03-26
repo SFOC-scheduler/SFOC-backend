@@ -6,6 +6,9 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -19,13 +22,16 @@ public class Schedule {
     private String title;
     private String memo;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_member_id")
     private TeamMember teamMember;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Convert(converter = PeriodRepeatConverter.class)
     private PeriodRepeat periodRepeat;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "schedule")
+    private List<SubSchedule> subSchedules = new ArrayList<>();
 
     private Schedule(String title, String memo, TeamMember teamMember, PeriodRepeat periodRepeat) {
         this.title = title;

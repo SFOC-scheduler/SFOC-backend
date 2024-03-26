@@ -22,7 +22,7 @@ public class SubSchedule {
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;
 
