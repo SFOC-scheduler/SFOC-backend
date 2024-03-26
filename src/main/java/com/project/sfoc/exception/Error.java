@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 @RequiredArgsConstructor
 public enum Error {
 
+    UNKNOWN_ERROR(100, HttpStatus.BAD_REQUEST, "서버 관리자에게 문의"),
     EXPIRED_ACCESS_TOKEN(101, HttpStatus.BAD_REQUEST, "만료된 access token"),
     EXPIRED_REFRESH_TOKEN(102, HttpStatus.BAD_REQUEST, "만료된 refresh token"),
     INVALID_TOKEN(103, HttpStatus.BAD_REQUEST, "유효하지 않은 token"),
