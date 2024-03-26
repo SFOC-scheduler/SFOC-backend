@@ -24,11 +24,11 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     @Query(value = """
         select s
         from Schedule s
-        join fetch s.subSchedules ss join s.teamMember m1
-        where m1.team.id in (select t.id
-                             from TeamMember m2
-                             join m2.team t join m2.user u
-                             where u.id = :userId)
+        join fetch s.subSchedules ss
+        where s.teamMember.team.id in (select t.id
+                                       from TeamMember m2
+                                       join m2.team t join m2.user u
+                                       where u.id = :userId)
     """)
     List<Schedule> findAllByUser_Id(Long userId);
 }

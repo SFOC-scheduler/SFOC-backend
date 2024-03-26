@@ -22,7 +22,7 @@ public class Schedule {
     private String title;
     private String memo;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_member_id")
     private TeamMember teamMember;
 
