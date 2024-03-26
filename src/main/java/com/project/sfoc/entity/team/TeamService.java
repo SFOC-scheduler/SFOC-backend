@@ -60,7 +60,7 @@ public class TeamService {
             throw new IllegalDtoException("이미 신청한 팀입니다.", Error.INVALID_DTO);
         }
 
-        User user = userRepository.findById(teamMemberDto.userId()).orElseThrow(IllegalArgumentException::new);
+        User user = userRepository.findById(teamMemberDto.userId()).orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
         Team team = findTeamByTeamId(teamMemberDto.teamId());
 
         Disclosure disclosure = team.getDisclosure();
@@ -98,11 +98,13 @@ public class TeamService {
         TeamGrant teamGrant = teamMember.getTeamGrant();
         Team team = findTeamByTeamId(teamId);
 
-        teamGrant.getInfo(team, teamMember);
+        teamGrant.update(teamInfoDto, team, teamMember);
 
     }
 
     public Page<ResponseTeamSearchInfoDto> searchTeam(RequestTeamSearchDto teamSearchDto, Pageable pageable) {
+
+
         return teamRepository.findSearchResult(teamSearchDto.teamSearch(), pageable);
     }
 

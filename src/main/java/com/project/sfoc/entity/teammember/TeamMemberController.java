@@ -6,7 +6,7 @@ import com.project.sfoc.entity.teammember.dto.TeamMemberResponseDto;
 import com.project.sfoc.entity.teammember.dto.UpdateTeamGrantDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +21,8 @@ public class TeamMemberController {
 
     @GetMapping("/{teamId}/members")
     public ResponseEntity<List<TeamMemberResponseDto>> findAllTeamMembers(@PathVariable(name = "teamId") Long teamId,
-                                                                          Authentication authentication) {
+                                                                          @AuthenticationPrincipal UserInfo userInfo) {
 
-        UserInfo userInfo = (UserInfo) authentication.getPrincipal();
         Long userId = userInfo.id();
 
         List<TeamMemberResponseDto> teamMembers = teamMemberService.findTeamMembers(teamId, userId);
@@ -33,10 +32,8 @@ public class TeamMemberController {
 
     @DeleteMapping("/{teamId}")
     public ResponseEntity<DeleteTeamMemberDto> deleteTeamMember(@RequestBody DeleteTeamMemberDto deleteTeamMemberDto,
-                                                                @PathVariable(name = "teamId") Long teamId,
-                                                                Authentication authentication) {
+                                            @PathVariable(name = "teamId") Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
 
-        UserInfo userInfo = (UserInfo) authentication.getPrincipal();
         Long userId = userInfo.id();
 
         teamMemberService.deleteTeamMember(deleteTeamMemberDto, teamId, userId);
@@ -46,10 +43,8 @@ public class TeamMemberController {
 
     @PatchMapping("/{teamId}/grant")
     public ResponseEntity<UpdateTeamGrantDto> updateTeamGrant(@RequestBody UpdateTeamGrantDto updateTeamGrantDto,
-                                                              @PathVariable(name = "teamId") Long teamId,
-                                                              Authentication authentication) {
+                                                              @PathVariable(name = "teamId") Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
 
-        UserInfo userInfo = (UserInfo) authentication.getPrincipal();
         Long userId = userInfo.id();
 
         UpdateTeamGrantDto updateDto = teamMemberService.updateTeamGrant(updateTeamGrantDto, teamId, userId);
