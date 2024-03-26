@@ -43,9 +43,8 @@ public class TeamMember {
         this.team = team;
     }
 
-    public static TeamMember of(String teamNickname, String userNickname,
-                                TeamGrant teamGrant, User user, Team team){
-        return new TeamMember(teamNickname, userNickname, teamGrant, user, team);
+    public static TeamMember of(User user, Team team, TeamGrant teamGrant){
+        return new TeamMember(team.getName(), user.getEmail(), teamGrant, user, team);
     }
 
     public void update(String teamNickname, String userNickname) {

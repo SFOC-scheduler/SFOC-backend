@@ -39,9 +39,9 @@ public class ScheduleInitializer implements ApplicationRunner {
         Team team = Team.of("팀 이름", "초대 코드", "팀 설명", Disclosure.PUBLIC);
         Team team1 = Team.of("더미 팀", "초대 코드1", "팀 설명", Disclosure.PUBLIC);
 
-        TeamMember teamMember = TeamMember.of("팀 닉네임", "사용자 닉네임", TeamGrant.HIGHEST_ADMIN, user, team);
-        TeamMember teamMember1 = TeamMember.of("팀 닉네임", "더미1", TeamGrant.NORMAL, user1, team);
-        TeamMember teamMember2 = TeamMember.of("팀 닉네임", "더미2", TeamGrant.HIGHEST_ADMIN, user2, team1);
+        TeamMember teamMember = TeamMember.of(user, team, TeamGrant.HIGHEST_ADMIN);
+        TeamMember teamMember1 = TeamMember.of(user1, team, TeamGrant.NORMAL);
+        TeamMember teamMember2 = TeamMember.of(user2, team1, TeamGrant.HIGHEST_ADMIN);
 
         LocalDateTime now = LocalDateTime.now();
 
