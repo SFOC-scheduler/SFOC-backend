@@ -36,9 +36,16 @@ public class CustomControllerAdvice {
     }
 
     @ExceptionHandler(MissingRequestCookieException.class)
-    public ResponseEntity<ErrorResponse> missingRequestCookieException(MissingRequestCookieException e) {
+    public ResponseEntity<ErrorResponse> MissingRequestCookieException(MissingRequestCookieException e) {
         log.error("refresh token이 전달되지 않았습니다.");
         return ErrorResponse.toResponseEntity(Error.INVALID_TOKEN);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception e) {
+        log.error(e.getMessage());
+        log.error(Error.UNKNOWN_ERROR.getMessage());
+        return ErrorResponse.toResponseEntity(Error.UNKNOWN_ERROR);
     }
 
 }
