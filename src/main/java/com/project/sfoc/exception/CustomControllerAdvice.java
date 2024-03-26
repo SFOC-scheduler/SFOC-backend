@@ -43,8 +43,7 @@ public class CustomControllerAdvice {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception e) {
-        log.error(e.getMessage());
-        log.error(Error.UNKNOWN_ERROR.getMessage());
+        log.error(e.getMessage(), e);
         return ErrorResponse.toResponseEntity(Error.UNKNOWN_ERROR);
     }
 
