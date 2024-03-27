@@ -31,14 +31,14 @@ public class TeamMemberController {
     }
 
     @DeleteMapping("/{teamId}")
-    public ResponseEntity<RequestDeleteTeamMemberDto> deleteTeamMember(@RequestBody RequestDeleteTeamMemberDto requestDeleteTeamMemberDto,
+    public ResponseEntity<Void> deleteTeamMember(@RequestBody RequestDeleteTeamMemberDto requestDeleteTeamMemberDto,
                                                                        @PathVariable(name = "teamId") Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
 
         Long userId = userInfo.id();
 
         teamMemberService.deleteTeamMember(requestDeleteTeamMemberDto, teamId, userId);
 
-        return ResponseEntity.ok(requestDeleteTeamMemberDto);
+        return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{teamId}/grant")

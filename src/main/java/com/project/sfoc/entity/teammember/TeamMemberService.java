@@ -16,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static com.project.sfoc.entity.teammember.TeamGrant.*;
-import static com.project.sfoc.entity.teammember.TeamGrant.HIGHEST_ADMIN;
-import static com.project.sfoc.entity.teammember.TeamGrant.NORMAL;
 
 @Service
 @Transactional
