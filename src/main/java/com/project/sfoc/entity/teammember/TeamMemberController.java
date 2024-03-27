@@ -1,9 +1,9 @@
 package com.project.sfoc.entity.teammember;
 
 import com.project.sfoc.security.jwt.UserInfo;
-import com.project.sfoc.entity.teammember.dto.DeleteTeamMemberDto;
-import com.project.sfoc.entity.teammember.dto.TeamMemberResponseDto;
-import com.project.sfoc.entity.teammember.dto.UpdateTeamGrantDto;
+import com.project.sfoc.entity.teammember.dto.RequestDeleteTeamMemberDto;
+import com.project.sfoc.entity.teammember.dto.ResponseTeamMemberDto;
+import com.project.sfoc.entity.teammember.dto.RequestUpdateTeamGrantDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,35 +20,35 @@ public class TeamMemberController {
 
 
     @GetMapping("/{teamId}/members")
-    public ResponseEntity<List<TeamMemberResponseDto>> findAllTeamMembers(@PathVariable(name = "teamId") Long teamId,
+    public ResponseEntity<List<ResponseTeamMemberDto>> findAllTeamMembers(@PathVariable(name = "teamId") Long teamId,
                                                                           @AuthenticationPrincipal UserInfo userInfo) {
 
         Long userId = userInfo.id();
 
-        List<TeamMemberResponseDto> teamMembers = teamMemberService.findTeamMembers(teamId, userId);
+        List<ResponseTeamMemberDto> teamMembers = teamMemberService.findTeamMembers(teamId, userId);
 
         return ResponseEntity.ok(teamMembers);
     }
 
     @DeleteMapping("/{teamId}")
-    public ResponseEntity<DeleteTeamMemberDto> deleteTeamMember(@RequestBody DeleteTeamMemberDto deleteTeamMemberDto,
-                                            @PathVariable(name = "teamId") Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
+    public ResponseEntity<RequestDeleteTeamMemberDto> deleteTeamMember(@RequestBody RequestDeleteTeamMemberDto requestDeleteTeamMemberDto,
+                                                                       @PathVariable(name = "teamId") Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
 
         Long userId = userInfo.id();
 
-        teamMemberService.deleteTeamMember(deleteTeamMemberDto, teamId, userId);
+        teamMemberService.deleteTeamMember(requestDeleteTeamMemberDto, teamId, userId);
 
-        return ResponseEntity.ok(deleteTeamMemberDto);
+        return ResponseEntity.ok(requestDeleteTeamMemberDto);
     }
 
     @PatchMapping("/{teamId}/grant")
-    public ResponseEntity<UpdateTeamGrantDto> updateTeamGrant(@RequestBody UpdateTeamGrantDto updateTeamGrantDto,
-                                                              @PathVariable(name = "teamId") Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
+    public ResponseEntity<Void> updateTeamGrant(@RequestBody RequestUpdateTeamGrantDto requestUpdateTeamGrantDto,
+                                                                     @PathVariable(name = "teamId") Long teamId, @AuthenticationPrincipal UserInfo userInfo) {
 
         Long userId = userInfo.id();
 
-        UpdateTeamGrantDto updateDto = teamMemberService.updateTeamGrant(updateTeamGrantDto, teamId, userId);
+        teamMemberService.updateTeamGrant(requestUpdateTeamGrantDto, teamId, userId);
 
-        return ResponseEntity.ok(updateDto);
+        return ResponseEntity.ok().build();
     }
 }
