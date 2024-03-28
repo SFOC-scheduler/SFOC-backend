@@ -3,6 +3,7 @@ package com.project.sfoc.entity.teammember;
 import com.project.sfoc.entity.team.TeamRepository;
 import com.project.sfoc.entity.teammember.dto.RequestDeleteTeamMemberDto;
 import com.project.sfoc.entity.teammember.dto.RequestUpdateTeamGrantDto;
+import com.project.sfoc.entity.teammember.strategy.*;
 import com.project.sfoc.entity.user.Provider;
 import com.project.sfoc.entity.user.User;
 import com.project.sfoc.entity.team.Disclosure;
@@ -40,6 +41,10 @@ class TeamMemberServiceTest {
 
     @Mock
     private TeamRepository teamRepository;
+
+
+    @Mock
+    private TeamGrantStrategyProvider provider;
     @InjectMocks
     private TeamMemberService teamMemberService;
 
@@ -131,10 +136,12 @@ class TeamMemberServiceTest {
         TeamMember deleteTeamMember = getTeamMember(getUser(2L), team, NORMAL);
         ReflectionTestUtils.setField(deleteTeamMember,"id", 2L);
 
+        TeamMemberDeleteStrategy strategy = new TeamMemberDeleteHighestAdminStrategy(teamMemberRepository, teamRepository);
 
         given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId()))
                 .willReturn(Optional.of(teamMember));
         given(teamMemberRepository.findById(deleteTeamMember.getId())).willReturn(Optional.of(deleteTeamMember));
+        given(provider.getDeleteStrategy(teamMember.getTeamGrant())).willReturn(strategy);
 
         //When
         teamMemberService.deleteTeamMember(requestDeleteTeamMemberDto, team.getId(), user.getId());
@@ -155,11 +162,14 @@ class TeamMemberServiceTest {
         User user = getUser(1L);
         TeamMember teamMember = getTeamMember(user, team, HIGHEST_ADMIN);
 
+        TeamMemberDeleteStrategy strategy = new TeamMemberDeleteHighestAdminStrategy(teamMemberRepository, teamRepository);
+
 
         given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId()))
                 .willReturn(Optional.of(teamMember));
         given(teamMemberRepository.findById(teamMember.getId())).willReturn(Optional.of(teamMember));
         given(teamMemberRepository.countByTeam_Id(team.getId())).willReturn(1);
+        given(provider.getDeleteStrategy(teamMember.getTeamGrant())).willReturn(strategy);
 
         //When
         teamMemberService.deleteTeamMember(requestDeleteTeamMemberDto, team.getId(), user.getId());
@@ -183,10 +193,14 @@ class TeamMemberServiceTest {
         User user = getUser(1L);
         TeamMember teamMember = getTeamMember(user, team, HIGHEST_ADMIN);
 
+        TeamMemberDeleteStrategy strategy = new TeamMemberDeleteHighestAdminStrategy(teamMemberRepository, teamRepository);
+
+
         given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId()))
                 .willReturn(Optional.of(teamMember));
         given(teamMemberRepository.findById(dto.teamMemberId())).willReturn(Optional.of(teamMember));
         given(teamMemberRepository.countByTeam_Id(team.getId())).willReturn(3);
+        given(provider.getDeleteStrategy(teamMember.getTeamGrant())).willReturn(strategy);
         //When
         //Then
         assertThatThrownBy(() -> teamMemberService.deleteTeamMember(dto, team.getId(), user.getId()))
@@ -206,10 +220,12 @@ class TeamMemberServiceTest {
         TeamMember teamMember = getTeamMember(user, team, HIGHEST_ADMIN);
         TeamMember teamMember2 = getTeamMember(getUser(2L), team, NORMAL);
         ReflectionTestUtils.setField(teamMember2,"id", dto.teamMemberId());
+        TeamGrantUpdateStrategy strategy = new TeamGrantUpdateHighestAdminStrategy();
 
         given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId()))
                 .willReturn(Optional.of(teamMember));
         given(teamMemberRepository.findById(teamMember2.getId())).willReturn(Optional.of(teamMember2));
+        given(provider.getUpdateStrategy(teamMember.getTeamGrant())).willReturn(strategy);
 
         //When
         teamMemberService.updateTeamGrant(dto, team.getId(), user.getId());
@@ -232,9 +248,11 @@ class TeamMemberServiceTest {
         TeamMember teamMember2 = getTeamMember(getUser(2L), team2, NORMAL);
         ReflectionTestUtils.setField(teamMember2,"id", dto.teamMemberId());
 
+
         given(teamMemberRepository.findByTeam_IdAndUser_Id(team.getId(), user.getId()))
                 .willReturn(Optional.of(teamMember));
         given(teamMemberRepository.findById(dto.teamMemberId())).willReturn(Optional.of(teamMember2));
+
 
         //When
         //Then

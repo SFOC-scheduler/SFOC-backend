@@ -1,9 +1,10 @@
 package com.project.sfoc.entity.teammember;
 
-import com.project.sfoc.entity.team.TeamRepository;
 import com.project.sfoc.entity.teammember.dto.RequestDeleteTeamMemberDto;
 import com.project.sfoc.entity.teammember.dto.ResponseTeamMemberDto;
 import com.project.sfoc.entity.teammember.dto.RequestUpdateTeamGrantDto;
+import com.project.sfoc.entity.teammember.strategy.TeamGrantUpdateStrategy;
+import com.project.sfoc.entity.teammember.strategy.TeamMemberDeleteStrategy;
 import com.project.sfoc.exception.EntityNotFoundException;
 import com.project.sfoc.exception.Error;
 import com.project.sfoc.exception.IllegalDtoException;
@@ -24,7 +25,7 @@ import static com.project.sfoc.entity.teammember.TeamGrant.*;
 public class TeamMemberService {
 
     private final TeamMemberRepository teamMemberRepository;
-    private final TeamRepository teamRepository;
+    private final TeamGrantStrategyProvider provider;
 
 
     public List<ResponseTeamMemberDto> findTeamMembers(Long teamId, Long userId) {
@@ -34,7 +35,6 @@ public class TeamMemberService {
 
         if(isAdmin(teamGrant)) {
             List<TeamMember> teamMembers = teamMemberRepository.findByTeam_Id(teamId);
-
             return teamMembers.stream().
                     map(teamMember -> ResponseTeamMemberDto.of(teamMember.getId(), teamMember.getUserNickname(), teamMember.getTeamGrant())).toList();
         } else {
@@ -49,36 +49,12 @@ public class TeamMemberService {
         if (!deleteMember.getTeam().getId().equals(teamId)) {
             throw new IllegalDtoException(Error.INVALID_DTO);
         }
-        TeamGrant teamGrant = admin.getTeamGrant();
 
-        if(teamGrant.equals(HIGHEST_ADMIN)) {
-            if(admin.getId().equals(deleteMember.getId())) {
-                if (teamMemberRepository.countByTeam_Id(teamId) != 1) {
-                    log.info("최상위 관리자는 혼자이거나 권한을 위임해야 팀에서 나갈 수 있습니다.");
-                    throw new IllegalDtoException("최상위 관리자는 혼자이거나 권한을 위임해야 팀에서 나갈 수 있습니다.",
-                            Error.INVALID_DTO);
-                } else {
-                    teamMemberRepository.delete(admin);
-                    teamRepository.deleteById(teamId);
-                }
-            } else {
-                teamMemberRepository.delete(deleteMember);
-            }
-        }
-        else if(teamGrant.equals(MIDDLE_ADMIN)) {
-            if(deleteMember.getTeamGrant() == NORMAL) {
-                teamMemberRepository.delete(deleteMember);
-            } else {
-                log.info("중간 관리자는 관리자를 탈퇴할 수 없습니다");
-                throw new IllegalDtoException(Error.INVALID_DTO);
-            }
-        }
-        else {
-            throw new PermissionDeniedError(Error.DENIED_ACCESS);
-        }
+        TeamMemberDeleteStrategy strategy = provider.getDeleteStrategy(admin.getTeamGrant());
+        strategy.delete(admin, deleteMember);
+
     }
 
-    // 다른 유저를 HIGHEST_ADMIN으로 바꾸면 상대방의 TeamGrant로 바꿈
     public void updateTeamGrant(RequestUpdateTeamGrantDto dto, Long teamId, Long userId) {
         TeamMember admin = findTeamMemberByTeamAndUser(teamId, userId);
         TeamMember updateTeamMember = findById(dto.teamMemberId());
@@ -87,15 +63,8 @@ public class TeamMemberService {
             throw new IllegalDtoException(Error.INVALID_DTO);
         }
 
-        if(admin.getTeamGrant().equals(HIGHEST_ADMIN)) {
-
-            if (dto.teamGrant().equals(HIGHEST_ADMIN)) {
-                admin.updateTeamGrant(updateTeamMember.getTeamGrant());
-            }
-            updateTeamMember.updateTeamGrant(dto.teamGrant());
-        } else {
-            throw new PermissionDeniedError(Error.DENIED_ACCESS);
-        }
+        TeamGrantUpdateStrategy strategy = provider.getUpdateStrategy(admin.getTeamGrant());
+        strategy.update(admin, updateTeamMember, dto);
     }
 
 
