@@ -45,7 +45,7 @@ public class StrategyConfig {
 
     @Bean
     public TeamMemberDeleteNormalStrategy teamMemberDeleteNormalStrategy() {
-        return new TeamMemberDeleteNormalStrategy(teamMemberRepository);
+        return new TeamMemberDeleteNormalStrategy();
     }
 
 
