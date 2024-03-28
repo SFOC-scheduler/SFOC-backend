@@ -1,14 +1,22 @@
 package com.project.sfoc.entity.teammember;
 
-import com.project.sfoc.entity.teammember.dto.DeleteTeamMemberDto;
-import com.project.sfoc.entity.teammember.dto.TeamMemberResponseDto;
-import com.project.sfoc.entity.teammember.dto.UpdateTeamGrantDto;
+import com.project.sfoc.entity.teammember.dto.RequestDeleteTeamMemberDto;
+import com.project.sfoc.entity.teammember.dto.ResponseTeamMemberDto;
+import com.project.sfoc.entity.teammember.dto.RequestUpdateTeamGrantDto;
+import com.project.sfoc.entity.teammember.strategy.TeamGrantUpdateStrategy;
+import com.project.sfoc.entity.teammember.strategy.TeamMemberDeleteStrategy;
+import com.project.sfoc.exception.EntityNotFoundException;
+import com.project.sfoc.exception.Error;
+import com.project.sfoc.exception.IllegalDtoException;
+import com.project.sfoc.exception.PermissionDeniedError;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static com.project.sfoc.entity.teammember.TeamGrant.*;
 
 @Service
 @Transactional
@@ -17,71 +25,59 @@ import java.util.List;
 public class TeamMemberService {
 
     private final TeamMemberRepository teamMemberRepository;
+    private final TeamGrantStrategyProvider provider;
 
 
-    public List<TeamMemberResponseDto> findTeamMembers(Long teamId, Long userId) {
+    public List<ResponseTeamMemberDto> findTeamMembers(Long teamId, Long userId) {
 
         TeamMember requestMember = findTeamMemberByTeamAndUser(teamId, userId);
         TeamGrant teamGrant = requestMember.getTeamGrant();
 
-        if(teamGrant == TeamGrant.HIGHEST_ADMIN || teamGrant == TeamGrant.MIDDLE_ADMIN) {
+        if(isAdmin(teamGrant)) {
             List<TeamMember> teamMembers = teamMemberRepository.findByTeam_Id(teamId);
-
             return teamMembers.stream().
-                    map(teamMember -> TeamMemberResponseDto.of(teamMember.getId(), teamMember.getUserNickname(), teamMember.getTeamGrant())).toList();
+                    map(teamMember -> ResponseTeamMemberDto.of(teamMember.getId(), teamMember.getUserNickname(), teamMember.getTeamGrant())).toList();
         } else {
-            log.info("권한이 없습니다.");
-            throw new IllegalStateException();
+            throw new PermissionDeniedError(Error.DENIED_ACCESS);
         }
     }
 
-    public void deleteTeamMember(DeleteTeamMemberDto deleteTeamMemberDto, Long teamId, Long userId) {
+    public void deleteTeamMember(RequestDeleteTeamMemberDto dto, Long teamId, Long userId) {
         TeamMember admin = findTeamMemberByTeamAndUser(teamId, userId);
-        TeamGrant teamGrant = admin.getTeamGrant();
+        TeamMember deleteMember = findById(dto.teamMemberId());
 
-        if(teamGrant == TeamGrant.MIDDLE_ADMIN || teamGrant == TeamGrant.HIGHEST_ADMIN) {
-
-            TeamMember deleteMember = findById(deleteTeamMemberDto.teamMemberId());
-            if(deleteMember.getTeamGrant() == TeamGrant.NORMAL) {
-                teamMemberRepository.deleteById(deleteTeamMemberDto.teamMemberId());
-            } else {
-                log.info("관리자는 팀에서 나갈 수 없습니다.");
-                throw new IllegalStateException();
-            }
-        } else {
-            log.info("권한이 없습니다.");
-            throw new IllegalStateException();
+        if (!deleteMember.getTeam().getId().equals(teamId)) {
+            throw new IllegalDtoException(Error.INVALID_DTO);
         }
+
+        TeamMemberDeleteStrategy strategy = provider.getDeleteStrategy(admin.getTeamGrant());
+        strategy.delete(admin, deleteMember);
+
     }
 
-    //TODO: 최상위 계층으로 변경하면 자신의 권한이 바뀌어야 함.
-
-    public UpdateTeamGrantDto updateTeamGrant(UpdateTeamGrantDto updateTeamGrantDto, Long teamId, Long userId) {
+    public void updateTeamGrant(RequestUpdateTeamGrantDto dto, Long teamId, Long userId) {
         TeamMember admin = findTeamMemberByTeamAndUser(teamId, userId);
+        TeamMember updateTeamMember = findById(dto.teamMemberId());
 
-        if(admin.getTeamGrant() == TeamGrant.HIGHEST_ADMIN) {
-
-            if (updateTeamGrantDto.teamGrant() == TeamGrant.HIGHEST_ADMIN) {
-                log.info("최상위 관리자는 한 명 이상 될 수 없습니다.");
-                throw new IllegalStateException();
-            }
-
-            TeamMember updateTeamMember = findById(updateTeamGrantDto.teamMemberId());
-            updateTeamMember.updateTeamGrant(updateTeamGrantDto.teamGrant());
-            return UpdateTeamGrantDto.of(updateTeamGrantDto.teamMemberId(), updateTeamGrantDto.teamGrant());
-        } else {
-            log.info("권한이 없습니다.");
-            throw new IllegalStateException();
+        if (!updateTeamMember.getTeam().getId().equals(teamId)) {
+            throw new IllegalDtoException(Error.INVALID_DTO);
         }
+
+        TeamGrantUpdateStrategy strategy = provider.getUpdateStrategy(admin.getTeamGrant());
+        strategy.update(admin, updateTeamMember, dto);
     }
 
 
     private TeamMember findTeamMemberByTeamAndUser(Long teamId, Long userId) {
-        return teamMemberRepository.findByTeam_IdAndUser_Id(teamId, userId).orElseThrow(IllegalArgumentException::new);
+        return teamMemberRepository.findByTeam_IdAndUser_Id(teamId, userId).orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
     }
 
     private TeamMember findById(Long teamMemberId) {
-        return teamMemberRepository.findById(teamMemberId).orElseThrow(IllegalArgumentException::new);
+        return teamMemberRepository.findById(teamMemberId).orElseThrow(() -> new EntityNotFoundException(Error.INVALID_DTO));
+    }
+
+    private boolean isAdmin(TeamGrant teamGrant) {
+        return teamGrant.equals(HIGHEST_ADMIN) || teamGrant.equals(MIDDLE_ADMIN);
     }
 
 }

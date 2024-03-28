@@ -16,4 +16,6 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
 
     Optional<TeamMember> findByTeam_IdAndUser_Id(Long teamId, Long userId);
 
+    int countByTeam_Id(Long teamId);
+
 }

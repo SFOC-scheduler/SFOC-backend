@@ -1,6 +1,6 @@
 package com.project.sfoc.entity.teammember.dto;
 
-public record DeleteTeamMemberDto(
+public record RequestDeleteTeamMemberDto(
         Long teamMemberId
 ) {
 
