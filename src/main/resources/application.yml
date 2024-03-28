@@ -64,6 +64,10 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
 
+discord:
+  name: ${DISCORD_NAME}
+  webhook-url: ${DISCORD_WEBHOOK_URL}
+
 management:
   endpoints:
     web:
